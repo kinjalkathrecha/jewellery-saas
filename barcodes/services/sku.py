@@ -11,11 +11,11 @@ def generate_next_sku(shop_id):
     with transaction.atomic():
         shop = Shop.objects.select_for_update().get(id=shop_id)
         seq = shop.next_sku_number
-        
+
         # Increment shop SKU pointer
         shop.next_sku_number = seq + 1
-        shop.save(update_fields=['next_sku_number'])
-        
+        shop.save(update_fields=["next_sku_number"])
+
         # Calculate prefix
         if shop.sku_prefix:
             prefix = "".join(c for c in shop.sku_prefix if c.isalnum()).upper()
@@ -28,5 +28,5 @@ def generate_next_sku(shop_id):
             else:
                 prefix = "JWL"
             prefix = "".join(c for c in prefix if c.isalnum())
-            
+
         return f"{prefix}-{seq:06d}"

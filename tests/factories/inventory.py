@@ -14,14 +14,15 @@ class CategoryFactory(factory.django.DjangoModelFactory):
     shop = factory.SubFactory(ShopFactory)
     name = factory.Sequence(lambda n: f"Category {n}")
 
+
 class JewelleryItemFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = JewelleryItem
 
     shop = factory.SubFactory(ShopFactory)
     item_name = factory.Sequence(lambda n: f"Jewellery Item {n}")
-    category = factory.SubFactory(CategoryFactory, shop=factory.SelfAttribute('..shop'))
-    metal_type = 'FIXED'
+    category = factory.SubFactory(CategoryFactory, shop=factory.SelfAttribute("..shop"))
+    metal_type = "FIXED"
     weight_in_grams = Decimal("5.5")
     price = Decimal("1000.00")
     stock_quantity = 10

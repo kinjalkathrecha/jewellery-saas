@@ -10,12 +10,12 @@ class TenantMiddleware(MiddlewareMixin):
         request.subscription_message = ""
 
         if request.user.is_authenticated:
-            if hasattr(request.user, 'shop') and request.user.shop:
+            if hasattr(request.user, "shop") and request.user.shop:
                 request.shop = request.user.shop
-                
+
                 # Resolve active status details
                 status_info = request.shop.get_subscription_status()
                 request.subscription_status = status_info
-                request.subscription_active = status_info['active']
-                request.subscription_locked = status_info['is_locked']
-                request.subscription_message = status_info['message']
+                request.subscription_active = status_info["active"]
+                request.subscription_locked = status_info["is_locked"]
+                request.subscription_message = status_info["message"]

@@ -10,14 +10,10 @@ class ShopSignupTests(TestCase):
     def setUp(self):
         # 1. Create a subscription plan to choose from during registration
         self.plan = SubscriptionPlan.objects.create(
-            name="Starter Plan",
-            price=499.00,
-            duration_days=30,
-            max_products=200,
-            max_users=2
+            name="Starter Plan", price=499.00, duration_days=30, max_products=200, max_users=2
         )
-        self.signup_url = reverse('accounts:register')
-        self.login_url = reverse('accounts:login')
+        self.signup_url = reverse("accounts:register")
+        self.login_url = reverse("accounts:login")
 
     def test_signup_page_loads(self):
         """Verify the shop signup page loads successfully and displays the plan."""
@@ -29,19 +25,19 @@ class ShopSignupTests(TestCase):
     def test_successful_shop_registration(self):
         """Verify that a valid POST request successfully registers a shop, admin user, and seeds data."""
         payload = {
-            'shop_name': "Sparkle Jewellers",
-            'owner_name': "Jane Sparkle",
-            'shop_email': "contact@sparkle.com",
-            'shop_phone': "9998887776",
-            'subscription_plan': self.plan.id,
-            'username': "janesparkle",
-            'admin_email': "jane@sparkle.com",
-            'password': "securepassword123",
-            'password_confirm': "securepassword123",
+            "shop_name": "Sparkle Jewellers",
+            "owner_name": "Jane Sparkle",
+            "shop_email": "contact@sparkle.com",
+            "shop_phone": "9998887776",
+            "subscription_plan": self.plan.id,
+            "username": "janesparkle",
+            "admin_email": "jane@sparkle.com",
+            "password": "securepassword123",
+            "password_confirm": "securepassword123",
         }
-        
+
         response = self.client.post(self.signup_url, data=payload)
-        
+
         # Verify redirect to login page
         self.assertRedirects(response, self.login_url)
 
@@ -55,7 +51,7 @@ class ShopSignupTests(TestCase):
         user = CustomUser.objects.filter(username="janesparkle").first()
         self.assertIsNotNone(user)
         self.assertEqual(user.shop, shop)
-        self.assertEqual(user.role, 'ADMIN')
+        self.assertEqual(user.role, "ADMIN")
         self.assertTrue(user.check_password("securepassword123"))
 
         # Verify Category seeding
@@ -73,20 +69,20 @@ class ShopSignupTests(TestCase):
     def test_signup_validation_mismatched_passwords(self):
         """Verify password confirm mismatch results in form error."""
         payload = {
-            'shop_name': "Sparkle Jewellers",
-            'owner_name': "Jane Sparkle",
-            'shop_email': "contact@sparkle.com",
-            'shop_phone': "9998887776",
-            'subscription_plan': self.plan.id,
-            'username': "janesparkle",
-            'admin_email': "jane@sparkle.com",
-            'password': "securepassword123",
-            'password_confirm': "differentpassword",
+            "shop_name": "Sparkle Jewellers",
+            "owner_name": "Jane Sparkle",
+            "shop_email": "contact@sparkle.com",
+            "shop_phone": "9998887776",
+            "subscription_plan": self.plan.id,
+            "username": "janesparkle",
+            "admin_email": "jane@sparkle.com",
+            "password": "securepassword123",
+            "password_confirm": "differentpassword",
         }
-        
+
         response = self.client.post(self.signup_url, data=payload)
         self.assertEqual(response.status_code, 200)
-        self.assertFormError(response, 'form', 'password_confirm', "Passwords do not match.")
+        self.assertFormError(response, "form", "password_confirm", "Passwords do not match.")
 
     def test_signup_validation_duplicate_shop_email(self):
         """Verify registering a shop with an email that already exists fails."""
@@ -96,47 +92,42 @@ class ShopSignupTests(TestCase):
             owner_name="Owner",
             email="contact@sparkle.com",
             phone_number="123",
-            subscription_plan=self.plan
+            subscription_plan=self.plan,
         )
-        
+
         payload = {
-            'shop_name': "Sparkle Jewellers",
-            'owner_name': "Jane Sparkle",
-            'shop_email': "contact@sparkle.com", # Duplicate
-            'shop_phone': "9998887776",
-            'subscription_plan': self.plan.id,
-            'username': "janesparkle",
-            'admin_email': "jane@sparkle.com",
-            'password': "securepassword123",
-            'password_confirm': "securepassword123",
+            "shop_name": "Sparkle Jewellers",
+            "owner_name": "Jane Sparkle",
+            "shop_email": "contact@sparkle.com",  # Duplicate
+            "shop_phone": "9998887776",
+            "subscription_plan": self.plan.id,
+            "username": "janesparkle",
+            "admin_email": "jane@sparkle.com",
+            "password": "securepassword123",
+            "password_confirm": "securepassword123",
         }
-        
+
         response = self.client.post(self.signup_url, data=payload)
         self.assertEqual(response.status_code, 200)
-        self.assertFormError(response, 'form', 'shop_email', "A shop with this email address is already registered.")
+        self.assertFormError(response, "form", "shop_email", "A shop with this email address is already registered.")
 
     def test_signup_validation_duplicate_username(self):
         """Verify registering with a username that already exists fails."""
         # Create an existing user
-        CustomUser.objects.create_user(
-            username="janesparkle",
-            email="other@email.com",
-            password="pwd"
-        )
-        
+        CustomUser.objects.create_user(username="janesparkle", email="other@email.com", password="pwd")
+
         payload = {
-            'shop_name': "Sparkle Jewellers",
-            'owner_name': "Jane Sparkle",
-            'shop_email': "contact@sparkle.com",
-            'shop_phone': "9998887776",
-            'subscription_plan': self.plan.id,
-            'username': "janesparkle", # Duplicate
-            'admin_email': "jane@sparkle.com",
-            'password': "securepassword123",
-            'password_confirm': "securepassword123",
+            "shop_name": "Sparkle Jewellers",
+            "owner_name": "Jane Sparkle",
+            "shop_email": "contact@sparkle.com",
+            "shop_phone": "9998887776",
+            "subscription_plan": self.plan.id,
+            "username": "janesparkle",  # Duplicate
+            "admin_email": "jane@sparkle.com",
+            "password": "securepassword123",
+            "password_confirm": "securepassword123",
         }
-        
+
         response = self.client.post(self.signup_url, data=payload)
         self.assertEqual(response.status_code, 200)
-        self.assertFormError(response, 'form', 'username', "This username is already taken.")
-
+        self.assertFormError(response, "form", "username", "This username is already taken.")

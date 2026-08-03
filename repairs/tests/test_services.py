@@ -15,15 +15,17 @@ def test_generate_job_card_number():
     job_card = generate_job_card_number(repair)
     assert job_card.startswith("SHOP5-JOB-")
 
+
 @pytest.mark.django_db
 def test_process_repair_status_change_success():
     shop = ShopFactory()
     customer = CustomerFactory(shop=shop)
-    
+
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
     user = User.objects.create_user(username="staff1", email="staff1@test.com", password="pwd", shop=shop)
-    
+
     repair = Repair.objects.create(
         shop=shop,
         customer=customer,
@@ -31,28 +33,30 @@ def test_process_repair_status_change_success():
         item_category="RING",
         item_description="Test Ring",
         expected_delivery_date=timezone.now().date(),
-        status='RECEIVED'
+        status="RECEIVED",
     )
-    
-    process_repair_status_change(repair, 'UNDER_REPAIR', user, notes="Started resizing")
+
+    process_repair_status_change(repair, "UNDER_REPAIR", user, notes="Started resizing")
     repair.refresh_from_db()
-    
-    assert repair.status == 'UNDER_REPAIR'
+
+    assert repair.status == "UNDER_REPAIR"
     history = RepairStatusHistory.objects.filter(repair=repair).first()
     assert history is not None
-    assert history.from_status == 'RECEIVED'
-    assert history.to_status == 'UNDER_REPAIR'
+    assert history.from_status == "RECEIVED"
+    assert history.to_status == "UNDER_REPAIR"
     assert history.changed_by == user
+
 
 @pytest.mark.django_db
 def test_process_repair_status_change_invalid():
     shop = ShopFactory()
     customer = CustomerFactory(shop=shop)
-    
+
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
     user = User.objects.create_user(username="staff2", email="staff2@test.com", password="pwd", shop=shop)
-    
+
     repair = Repair.objects.create(
         shop=shop,
         customer=customer,
@@ -60,8 +64,8 @@ def test_process_repair_status_change_invalid():
         item_category="RING",
         item_description="Test Ring",
         expected_delivery_date=timezone.now().date(),
-        status='RECEIVED'
+        status="RECEIVED",
     )
-    
+
     with pytest.raises(ValidationError):
-        process_repair_status_change(repair, 'DELIVERED', user)
+        process_repair_status_change(repair, "DELIVERED", user)

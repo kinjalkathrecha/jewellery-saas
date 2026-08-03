@@ -17,9 +17,10 @@ def test_repair_model_str():
         item_category="RING",
         item_description="Test ring",
         repair_type="Resizing",
-        expected_delivery_date=timezone.now().date()
+        expected_delivery_date=timezone.now().date(),
     )
     assert str(repair) == "JC-100 - John Doe"
+
 
 @pytest.mark.django_db
 def test_repair_image_path_helper():
@@ -31,10 +32,11 @@ def test_repair_image_path_helper():
         job_card_number="JC-101",
         item_category="RING",
         item_description="Test ring",
-        expected_delivery_date=timezone.now().date()
+        expected_delivery_date=timezone.now().date(),
     )
     path = get_repair_image_path(repair, "test.png")
     assert path == f"repair_images/shop_{shop.id}/test.png"
+
 
 @pytest.mark.django_db
 def test_repair_estimated_cost_constraint():
@@ -48,5 +50,5 @@ def test_repair_estimated_cost_constraint():
             item_category="RING",
             item_description="Test ring",
             estimated_cost=-10.00,
-            expected_delivery_date=timezone.now().date()
+            expected_delivery_date=timezone.now().date(),
         )

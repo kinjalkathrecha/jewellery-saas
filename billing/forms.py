@@ -10,27 +10,26 @@ from .models import Invoice, InvoiceItem
 class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['customer', 'invoice_number', 'tax_amount']
-    
+        fields = ["customer", "invoice_number", "tax_amount"]
+
     def __init__(self, *args, **kwargs):
-        shop = kwargs.pop('shop', None)
+        shop = kwargs.pop("shop", None)
         super().__init__(*args, **kwargs)
         if shop:
-            self.fields['customer'].queryset = Customer.objects.filter(shop=shop)
+            self.fields["customer"].queryset = Customer.objects.filter(shop=shop)
+
 
 class InvoiceItemForm(forms.ModelForm):
     class Meta:
         model = InvoiceItem
-        fields = ['item', 'quantity', 'rate', 'amount']
-    
+        fields = ["item", "quantity", "rate", "amount"]
+
     def __init__(self, *args, **kwargs):
-        shop = kwargs.pop('shop', None)
+        shop = kwargs.pop("shop", None)
         super().__init__(*args, **kwargs)
         if shop:
-            self.fields['item'].queryset = JewelleryItem.objects.filter(shop=shop)
+            self.fields["item"].queryset = JewelleryItem.objects.filter(shop=shop)
+
 
 # Base formset factory
-InvoiceItemFormSet = inlineformset_factory(
-    Invoice, InvoiceItem, form=InvoiceItemForm,
-    extra=1, can_delete=True
-)
+InvoiceItemFormSet = inlineformset_factory(Invoice, InvoiceItem, form=InvoiceItemForm, extra=1, can_delete=True)
