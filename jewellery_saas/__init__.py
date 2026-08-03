@@ -1,3 +1,1 @@
-import pymysql
-
-pymysql.install_as_MySQLdb()
+# This project uses PostgreSQL. MySQL/PyMySQL support is not required.

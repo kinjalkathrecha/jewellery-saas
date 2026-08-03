@@ -1,0 +1,255 @@
+:root {
+    --bg-dark: #f5f6f8;
+    --bg-card: #ffffff;
+    --text-primary: #1d1e22;
+    --text-muted: #6c727f;
+    --gold-primary: #aa8529;
+    --gold-light: #d4af37;
+    --gold-dark: #8c6b1d;
+    --accent: #e2e5e9;
+    --danger: #d9534f;
+    --success: #2e7d32;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Typography & Gradients */
+.text-gradient {
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--bg-card);
+    border-right: 1px solid var(--accent);
+    padding: 2rem 1.5rem;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.sidebar .nav-link {
+    color: var(--text-muted);
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar .nav-link i {
+    font-size: 1.25rem;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%);
+    color: var(--gold-primary);
+}
+
+/* Main Content */
+.main-content {
+    margin-left: 260px;
+    padding: 2rem;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+}
+
+/* Cards & Containers (Glassmorphism) */
+.glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(170, 133, 41, 0.15);
+}
+
+/* Custom Buttons */
+.btn-gold {
+    background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    color: #fff;
+}
+
+.btn-outline-gold {
+    background: transparent;
+    color: var(--gold-primary);
+    border: 1px solid var(--gold-primary);
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-gold:hover {
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold-light);
+}
+
+/* Forms & Inputs */
+.form-control, .form-select {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--accent);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.15);
+}
+
+/* Tables */
+.table-dark {
+    --bs-table-bg: var(--bg-card);
+    --bs-table-color: var(--text-primary);
+    --bs-table-border-color: var(--accent);
+}
+
+.table-dark th {
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+/* Authentication Page Styling */
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #ffffff 0%, #eef0f3 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 450px;
+    z-index: 10;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+}
+
+/* Glowing background elements for auth page */
+.auth-glow-1 {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.auth-glow-2 {
+    position: absolute;
+    bottom: -10%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+/* Alerts */
+.g-alert {
+    border: none;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border-left: 4px solid var(--gold-primary);
+    color: var(--text-primary);
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+/* Theme overrides for text visibility on light background */
+.text-white {
+    color: var(--text-primary) !important;
+}
+.text-white-50 {
+    color: var(--text-muted) !important;
+}
+
+/* Contrast Button Overrides */
+.btn-danger, .btn-success, .btn-primary, .btn-gold {
+    color: #ffffff !important;
+}
+.btn-warning {
+    color: #1d1e22 !important;
+}
+
+/* Textarea & Inputs Styling */
+textarea, .form-textarea {
+    background-color: var(--bg-dark) !important;
+    border: 1px solid var(--accent) !important;
+    color: var(--text-primary) !important;
+    border-radius: 8px !important;
+    padding: 0.7rem 1rem !important;
+    transition: all 0.2s ease-in-out;
+}
+textarea:focus {
+    border-color: var(--gold-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.15) !important;
+    outline: none !important;
+}
+
+/* Responsive Drawer Animations */
+.sidebar {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease !important;
+}
+.sidebar.show {
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15) !important;
+}
