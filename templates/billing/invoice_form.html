@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block title %}Create Invoice | Jewellery SaaS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h2 class="fw-bold mb-1">Create Invoice</h2>
+            <p class="text-muted mb-0">Record sold items and generate receipt.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <a href="{% url 'billing:invoice_list' %}" class="btn btn-outline-light"><i class='bx bx-arrow-back me-1'></i> Cancel</a>
+        </div>
+    </div>
+
+    <form method="post" id="invoiceForm">
+        {% csrf_token %}
+        
+        <!-- Scanner Input Box and Scan History (no-print) -->
+        <div class="row mb-4 no-print">
+            <div class="col-lg-12">
+                <div class="glass-card d-flex flex-column flex-md-row align-items-md-center justify-content-between p-3 gap-3">
+                    <div class="d-flex align-items-center flex-grow-1">
+                        <span class="fs-4 text-gold me-3"><i class='bx bx-barcode-reader'></i></span>
+                        <input type="text" id="barcode-scan-input" class="form-control bg-dark text-white border-secondary" placeholder="Scan Barcode / Enter SKU (F2 to focus, Esc to clear)..." autocomplete="off" style="max-width: 450px;">
+                        <span class="text-muted small ms-3 d-none d-lg-inline">Suffix: <strong>{{ request.shop.get_scanner_suffix_display }}</strong></span>
+                    </div>
+                    <div class="d-flex align-items-center" id="scan-history-tray">
+                        <span class="text-muted small me-2"><i class='bx bx-history'></i> Scanned:</span>
+                        <div id="scan-history-items" class="d-flex gap-2 align-items-center">
+                            <span class="text-muted small italic">None</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Invoice Details -->
+            <div class="col-lg-4 mb-4">
+                <div class="glass-card">
+                    <h5 class="text-gold mb-3">Invoice Details</h5>
+                    {{ form|crispy }}
+                    
+                    <div class="alert alert-dark mt-4 border-secondary">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal:</span>
+                            <span class="text-white fw-bold" id="ui-subtotal">₹0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">GST Base:</span>
+                            <span class="text-white fw-bold" id="ui-tax">₹0.00</span>
+                        </div>
+                        <hr class="border-secondary">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-white fs-5">Total:</span>
+                            <span class="text-gold fs-4 fw-bold" id="ui-total">₹0.00</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-gold w-100 mt-3 py-2"><i class='bx bx-check-circle me-1'></i> Generate Invoice</button>
+                </div>
+            </div>
+            
+            <!-- Items Selection Formset -->
+            <div class="col-lg-8">
+                <div class="glass-card">
+                    <h5 class="text-gold mb-4">Items Selection</h5>
+                    
+                    {{ items.management_form }}
+                    <div class="table-responsive">
+                        <table class="table table-dark border-secondary">
+                            <thead>
+                                <tr>
+                                    <th width="35%">Jewellery Item</th>
+                                    <th>Qty</th>
+                                    <th>Rate (₹)</th>
+                                    <th>Amount (₹)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-table-body">
+                                {% for form in items %}
+                                <tr class="item-row">
+                                    <td>{{ form.id }}{{ form.item|as_crispy_field }}</td>
+                                    <td>{{ form.quantity|as_crispy_field }}</td>
+                                    <td>{{ form.rate|as_crispy_field }}</td>
+                                    <td>{{ form.amount|as_crispy_field }}</td>
+                                    <td class="text-center align-middle">
+                                        {% if form.instance.pk %}
+                                            {{ form.DELETE }}
+                                        {% else %}
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-row"><i class='bx bx-x'></i></button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline-gold btn-sm mt-3" id="add-row-btn">
+                        <i class='bx bx-plus me-1'></i> Add Item Row
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/barcode-scanner.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const totalFormsInput = document.getElementById('id_items-TOTAL_FORMS');
+    const tableBody = document.getElementById('items-table-body');
+    const addRowBtn = document.getElementById('add-row-btn');
+    
+    let scanHistory = [];
+    
+    function calculateTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('.item-row').forEach(row => {
+            const qtyInput = row.querySelector('input[name$="-quantity"]');
+            const rateInput = row.querySelector('input[name$="-rate"]');
+            const amountInput = row.querySelector('input[name$="-amount"]');
+            
+            if (qtyInput && rateInput && amountInput) {
+                const qty = parseFloat(qtyInput.value) || 0;
+                const rate = parseFloat(rateInput.value) || 0;
+                const amount = qty * rate;
+                
+                amountInput.value = amount.toFixed(2);
+                subtotal += amount;
+            }
+        });
+        
+        const taxInput = document.getElementById('id_tax_amount');
+        const taxVal = parseFloat(taxInput ? taxInput.value : 0) || 0;
+        const total = subtotal + taxVal;
+        
+        document.getElementById('ui-subtotal').innerText = '₹' + subtotal.toFixed(2);
+        document.getElementById('ui-tax').innerText = '₹' + taxVal.toFixed(2);
+        document.getElementById('ui-total').innerText = '₹' + total.toFixed(2);
+    }
+    
+    function addNewRow() {
+        const currentFormCount = parseInt(totalFormsInput.value);
+        const prototypeRow = document.querySelector('.item-row');
+        if (!prototypeRow) return;
+        
+        const newRow = prototypeRow.cloneNode(true);
+        
+        // Reset name, id and values
+        newRow.querySelectorAll('input, select').forEach(input => {
+            const name = input.getAttribute('name');
+            if (name) {
+                input.setAttribute('name', name.replace(/items-\d+-/, `items-${currentFormCount}-`));
+            }
+            const id = input.getAttribute('id');
+            if (id) {
+                input.setAttribute('id', id.replace(/id_items-\d+-/, `id_items-${currentFormCount}-`));
+            }
+            
+            if (input.tagName === 'SELECT') {
+                input.value = '';
+            } else if (input.type !== 'hidden') {
+                input.value = input.name.includes('-quantity') ? '1' : '0.00';
+            }
+        });
+        
+        const idInput = newRow.querySelector('input[name$="-id"]');
+        if (idInput) idInput.value = '';
+        
+        // Append delete button click event
+        const removeBtn = newRow.querySelector('.remove-row');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+                newRow.remove();
+                calculateTotals();
+            });
+        }
+        
+        tableBody.appendChild(newRow);
+        totalFormsInput.value = currentFormCount + 1;
+        
+        return newRow;
+    }
+
+    if (addRowBtn) {
+        addRowBtn.addEventListener('click', function() {
+            addNewRow();
+        });
+    }
+
+    // Set remove listeners for initial rows
+    document.querySelectorAll('.remove-row').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const row = this.closest('.item-row');
+            if (row) {
+                row.remove();
+                calculateTotals();
+            }
+        });
+    });
+    
+    // Listen to changes on quantity, rate, tax and item selects
+    document.getElementById('invoiceForm').addEventListener('input', function(e) {
+        if(e.target.tagName === 'INPUT') {
+            calculateTotals();
+        }
+    });
+
+    document.getElementById('invoiceForm').addEventListener('change', function(e) {
+        if(e.target.tagName === 'SELECT' && e.target.name.includes('-item')) {
+            const row = e.target.closest('tr');
+            const rateInput = row.querySelector('input[name$="-rate"]');
+            const itemId = e.target.value;
+            
+            if(itemId && rateInput) {
+                fetch(`/billing/api/get-item-price/?item_id=${itemId}`)
+                .then(response => response.json())
+                .then(data => {
+                    rateInput.value = data.rate;
+                    calculateTotals();
+                })
+                .catch(error => console.error('Error fetching price:', error));
+            } else if (!itemId && rateInput) {
+                rateInput.value = 0;
+                calculateTotals();
+            }
+        }
+    });
+
+    // Barcode Scanning Integrations
+    function addScanToHistory(sku) {
+        scanHistory.unshift(sku);
+        if (scanHistory.length > 5) {
+            scanHistory.pop();
+        }
+        const container = document.getElementById('scan-history-items');
+        container.innerHTML = '';
+        scanHistory.forEach(item => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-success';
+            badge.textContent = item;
+            container.appendChild(badge);
+        });
+    }
+
+    function handleScannedItem(data) {
+        // 1. Search if item already in the table
+        let existingRow = null;
+        document.querySelectorAll('.item-row').forEach(row => {
+            const select = row.querySelector('select[name$="-item"]');
+            if (select && select.value == data.id) {
+                existingRow = row;
+            }
+        });
+
+        if (existingRow) {
+            const qtyInput = existingRow.querySelector('input[name$="-quantity"]');
+            if (qtyInput) {
+                const currentQty = parseInt(qtyInput.value) || 0;
+                const newQty = currentQty + 1;
+                
+                if (newQty > data.stock) {
+                    scanner.playBeep('error');
+                    alert(`Warning: Stock limit reached. Only ${data.stock} item(s) available in inventory.`);
+                    return;
+                }
+                
+                qtyInput.value = newQty;
+                qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
+                addScanToHistory(data.sku);
+            }
+        } else {
+            // 2. Find empty row
+            let targetRow = null;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const select = row.querySelector('select[name$="-item"]');
+                if (select && select.value == '') {
+                    targetRow = row;
+                }
+            });
+
+            // If no empty row, clone a new one
+            if (!targetRow) {
+                targetRow = addNewRow();
+            }
+
+            if (targetRow) {
+                const select = targetRow.querySelector('select[name$="-item"]');
+                select.value = data.id;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                addScanToHistory(data.sku);
+            }
+        }
+    }
+
+    function handleScanError(type, data) {
+        if (type === 'OUT_OF_STOCK') {
+            alert(`Item Out of Stock! "${data.name}" (${data.sku}) is sold out.`);
+        } else if (type === 'NOT_FOUND') {
+            alert(`Item Not Found! Barcode code "${data.sku}" does not match any items in this shop.`);
+        } else {
+            console.error('Scan error:', type, data);
+        }
+    }
+
+    const scanner = new BarcodeScanner({
+        inputId: 'barcode-scan-input',
+        suffix: '{{ request.shop.scanner_suffix }}',
+        onScanSuccess: handleScannedItem,
+        onScanError: handleScanError
+    });
+
+    // Keyboard Shortcuts (F4, F6, F8)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'F4') {
+            e.preventDefault();
+            const customerSelect = document.getElementById('id_customer');
+            if (customerSelect) customerSelect.focus();
+        } else if (e.key === 'F6') {
+            e.preventDefault();
+            const taxInput = document.getElementById('id_tax_amount');
+            if (taxInput) taxInput.focus();
+        } else if (e.key === 'F8') {
+            e.preventDefault();
+            const form = document.getElementById('invoiceForm');
+            if (form) form.submit();
+        }
+    });
+    
+    // Init totals
+    calculateTotals();
+});
+</script>
+<style>
+/* Hide labels for crispy forms in the table to save space */
+#items-table-body label { display: none; }
+#items-table-body .mb-3 { margin-bottom: 0 !important; }
+</style>
+{% endblock %}

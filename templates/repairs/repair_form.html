@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if object %}Edit Job Card | {{ object.job_card_number }}{% else %}New Repair Job Card{% endif %} | Jewellery SaaS
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 900px;">
+    <div class="mb-4">
+        <a href="{% url 'repairs:repair_list' %}" class="btn btn-sm btn-outline-gold"><i class='bx bx-arrow-back me-1'></i> Back to List</a>
+    </div>
+
+    <div class="glass-card">
+        <div class="text-center mb-4">
+            <i class='bx bxs-wrench text-gradient' style="font-size: 3rem;"></i>
+            <h2 class="fw-bold mt-2 text-white">
+                {% if object %}Edit Repair Job Card{% else %}New Repair Job Card{% endif %}
+            </h2>
+            <p class="text-muted">Fill out the customer item details, weight parameters, cost estimates, and staff assignment below.</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="mt-4">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="row g-4">
+                <!-- Section 1: Customer & Assignment -->
+                <div class="col-md-6 border-end border-secondary border-opacity-25 pe-md-4">
+                    <h5 class="text-gradient mb-3 fw-semibold"><i class='bx bxs-user-detail me-2'></i>Customer & Staff</h5>
+                    
+                    <div class="mb-3">
+                        {{ form.customer|as_crispy_field }}
+                        <div class="form-text text-muted small">Select an existing CRM client. If they aren't registered yet, please add them in the <a href="{% url 'customers:customer_add' %}" target="_blank" class="text-gradient text-decoration-none">Customers page</a> first.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.assigned_to|as_crispy_field }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.priority|as_crispy_field }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.status|as_crispy_field }}
+                    </div>
+                </div>
+
+                <!-- Section 2: Item Description & Details -->
+                <div class="col-md-6 ps-md-4">
+                    <h5 class="text-gradient mb-3 fw-semibold"><i class='bx bxs-diamond me-2'></i>Item & Specification</h5>
+                    
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            {{ form.item_category|as_crispy_field }}
+                        </div>
+                        <div class="col-sm-6">
+                            {{ form.item_weight|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        {{ form.repair_type|as_crispy_field }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.item_description|as_crispy_field }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.item_photo|as_crispy_field }}
+                        {% if object.item_photo %}
+                            <div class="mt-2 text-center">
+                                <small class="text-muted d-block mb-1">Current Photo Preview:</small>
+                                <img src="{{ object.item_photo.url }}" class="img-thumbnail bg-dark border-secondary p-1 rounded" style="max-height: 120px;" alt="Item preview">
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4 border-secondary border-opacity-25">
+
+            <!-- Section 3: Cost & Schedule details -->
+            <h5 class="text-gradient mb-3 fw-semibold"><i class='bx bxs-credit-card me-2'></i>Schedule & Pricing</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    {{ form.estimated_cost|as_crispy_field }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.actual_cost|as_crispy_field }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.expected_delivery_date|as_crispy_field }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                {{ form.internal_notes|as_crispy_field }}
+                <div class="form-text text-muted small"><i class='bx bxs-lock-alt me-1'></i>This field is strictly for internal staff views only. It will not be printed on customer job cards.</div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{% url 'repairs:repair_list' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                <button type="submit" class="btn btn-gold px-5 fw-bold">Save Job Card</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

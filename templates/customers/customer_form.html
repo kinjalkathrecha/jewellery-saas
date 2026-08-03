@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Customer | Jewellery SaaS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h2 class="fw-bold mb-1">{% if object %}Edit Profile: {{ object.name }}{% else %}Register New Customer{% endif %}</h2>
+            <p class="text-muted mb-0">Record this customer's details to log future invoices.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <a href="{% url 'customers:customer_list' %}" class="btn btn-outline-light"><i class='bx bx-arrow-back me-1'></i> Return to Listing</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="glass-card">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <h5 class="text-gold mb-4 mt-2 text-gradient">Personal Information</h5>
+                    
+                    <div class="mb-3">
+                        {{ form.name|as_crispy_field }}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.mobile_number|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.city|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-gold px-5 py-2">
+                            <i class='bx bx-save me-1'></i> Save Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="col-lg-5 mt-4 mt-lg-0">
+            {% if object %}
+            <div class="glass-card bg-primary bg-opacity-10 border-primary mb-4">
+                <div class="text-center py-4">
+                    <div class="avatar bg-primary text-white rounded-circle mx-auto mb-3 d-flex justify-content-center align-items-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ object.name|make_list|first|upper }}
+                    </div>
+                    <h4 class="text-white">{{ object.name }}</h4>
+                    <span class="badge bg-gold text-dark fs-6 mt-2">Lifetime Value: ₹{{ object.total_spent }}</span>
+                    <p class="text-muted mt-3 mb-0 small">Registered on {{ object.created_at|date }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="glass-card">
+                <div class="d-flex align-items-center mb-3">
+                    <i class='bx bxs-check-shield text-gold fs-4 me-2'></i>
+                    <h5 class="mb-0 text-white">Why Record Data?</h5>
+                </div>
+                <p class="text-muted small mb-0">Building a robust customer database allows you to automatically attach profiles quickly to bills, generating beautiful tax-ready receipts and mapping "Total Lifetime Spends" correctly.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-card label {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+.bg-gold {
+    background-color: var(--gold-primary);
+}
+.border-primary {
+    border-color: rgba(13, 110, 253, 0.2) !important;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}Barcode Audit Logs | Jewellery SaaS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-1"><i class='bx bx-history text-gold'></i> Barcode Audit Logs</h2>
+            <p class="text-muted mb-0">Trace printing histories, scan counts, checkouts, and device lookup events.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="{% url 'dashboard:shop_settings' %}" class="btn btn-outline-light"><i class='bx bx-arrow-back me-1'></i> Back to Settings</a>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="glass-card mb-4 p-3">
+        <form method="GET" class="row g-3 align-items-end">
+            <!-- Event Type Filter -->
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold">Filter Event Type</label>
+                <select name="event_type" class="form-select bg-dark text-white border-secondary">
+                    <option value="">-- All Events --</option>
+                    {% for value, label in event_types %}
+                        <option value="{{ value }}" {% if selected_event_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- SKU Search -->
+            <div class="col-md-5">
+                <label class="form-label text-muted small fw-bold">Search SKU Snapshot</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 border-secondary"><i class='bx bx-search text-muted'></i></span>
+                    <input type="text" name="sku" class="form-control border-start-0 bg-dark text-white border-secondary" placeholder="Enter SKU..." value="{{ selected_sku }}">
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="col-md-3">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold flex-grow-1">Filter</button>
+                    <a href="{% url 'barcodes:barcode_events' %}" class="btn btn-outline-light"><i class='bx bx-refresh'></i></a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Events Logs Table -->
+    <div class="glass-card">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th width="180">Timestamp</th>
+                        <th width="150">Event Type</th>
+                        <th width="120">Operator (User)</th>
+                        <th width="150">SKU Snapshot</th>
+                        <th>Metadata Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in page_obj %}
+                    <tr>
+                        <td class="text-white-50">{{ event.created_at|date:"Y-m-d H:i:s" }}</td>
+                        <td>
+                            {% if event.event_type == 'SCAN_SUCCESS' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class='bx bx-check-circle me-1'></i> Scan Success</span>
+                            {% elif event.event_type == 'SCAN_FAILED' %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class='bx bx-x-circle me-1'></i> Scan Failed</span>
+                            {% elif event.event_type == 'PRINT_LABEL' %}
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class='bx bx-printer me-1'></i> Single Print</span>
+                            {% elif event.event_type == 'PRINT_BULK' %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class='bx bx-receipt me-1'></i> Bulk Print</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-white border border-secondary-subtle">{{ event.get_event_type_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ event.user.username|default:"System / Scanner" }}</td>
+                        <td><span class="badge bg-secondary font-monospace">{{ event.sku_snapshot }}</span></td>
+                        <td>
+                            <div class="small-meta-box">
+                                {% for key, val in event.metadata.items %}
+                                    <div class="mb-1 text-truncate">
+                                        <span class="text-gold font-monospace small">{{ key }}:</span>
+                                        <code class="text-white-50">{{ val }}</code>
+                                    </div>
+                                {% empty %}
+                                    <span class="text-muted small italic">None</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class='bx bx-history fs-1 mb-3'></i>
+                            <h5>No audit logs found.</h5>
+                            <p>Events will appear here automatically when print lists are rendered or POS barcodes scanned.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="d-flex justify-content-between align-items-center mt-4 no-print">
+        <span class="text-muted small">
+            Showing Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        <nav>
+            <ul class="pagination mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link bg-dark text-gold border-secondary" href="?page={{ page_obj.previous_page_number }}{% if selected_event_type %}&event_type={{ selected_event_type }}{% endif %}{% if selected_sku %}&sku={{ selected_sku }}{% endif %}">
+                        <i class='bx bx-chevron-left'></i> Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link bg-dark text-muted border-secondary"><i class='bx bx-chevron-left'></i> Previous</span>
+                </li>
+                {% endif %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item ms-2">
+                    <a class="page-link bg-dark text-gold border-secondary" href="?page={{ page_obj.next_page_number }}{% if selected_event_type %}&event_type={{ selected_event_type }}{% endif %}{% if selected_sku %}&sku={{ selected_sku }}{% endif %}">
+                        Next <i class='bx bx-chevron-right'></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled ms-2">
+                    <span class="page-link bg-dark text-muted border-secondary">Next <i class='bx bx-chevron-right'></i></span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.bg-success-subtle { background-color: rgba(25, 135, 84, 0.15) !important; }
+.bg-danger-subtle { background-color: rgba(220, 53, 69, 0.15) !important; }
+.bg-primary-subtle { background-color: rgba(13, 110, 253, 0.15) !important; }
+.bg-warning-subtle { background-color: rgba(255, 193, 7, 0.15) !important; }
+.bg-secondary-subtle { background-color: rgba(108, 117, 125, 0.15) !important; }
+
+.small-meta-box {
+    max-height: 75px;
+    overflow-y: auto;
+    font-size: 0.85rem;
+}
+.small-meta-box::-webkit-scrollbar {
+    width: 4px;
+}
+.small-meta-box::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 2px;
+}
+</style>
+{% endblock %}

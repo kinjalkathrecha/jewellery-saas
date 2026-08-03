@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Add Supplier{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-white">Add New Supplier</h2>
+    <a href="{% url 'purchases:supplier_list' %}" class="btn btn-outline-light">Back</a>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card glass-card">
+            <div class="card-body text-white">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3">Save Supplier</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

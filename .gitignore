@@ -1,0 +1,38 @@
+# Environment
+.env
+.env.*
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Database
+db.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Pytest
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Media (if not needed)
+media/
+
+# Backup files
+backup_before_pg.json
+database/sqlite/

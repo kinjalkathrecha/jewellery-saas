@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Billing | Jewellery SaaS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <h2 class="fw-bold mb-1">Invoices & Billing</h2>
+            <p class="text-muted mb-0">Manage customer billing and generate PDF receipts.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <a href="{% url 'billing:invoice_add' %}" class="btn btn-gold"><i class='bx bx-receipt me-1'></i> Create New Invoice</a>
+        </div>
+    </div>
+
+    <!-- Invoices Table -->
+    <div class="glass-card">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Total Amount</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td class="fw-bold text-gold">{{ invoice.invoice_number }}</td>
+                        <td>{{ invoice.date|date:"M d, Y" }}</td>
+                        <td>{{ invoice.customer.name|default:"Walking Customer" }}</td>
+                        <td class="fw-bold text-success">₹{{ invoice.total_amount }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'billing:invoice_detail' invoice.pk %}" class="btn btn-sm btn-outline-light"><i class='bx bx-show me-1'></i> View / Print</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class='bx bx-receipt fs-1 mb-3'></i>
+                            <h5>No invoices yet.</h5>
+                            <p>Start billing to see records here.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% block title %}Job Card {{ repair.job_card_number }} | Jewellery SaaS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Navigation -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a href="{% url 'repairs:repair_list' %}" class="btn btn-sm btn-outline-gold mb-2 d-inline-flex align-items-center"><i class='bx bx-arrow-back me-1'></i> Back to List</a>
+            <h2 class="fw-bold mb-0 text-white">Job Card: {{ repair.job_card_number }}</h2>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'repairs:repair_pdf' repair.id %}" target="_blank" class="btn btn-outline-gold d-inline-flex align-items-center"><i class='bx bx-printer me-1'></i> Print PDF Receipt</a>
+            <a href="{% url 'repairs:repair_edit' repair.id %}" class="btn btn-gold d-inline-flex align-items-center"><i class='bx bx-edit me-1'></i> Edit Details</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Side: Main Details and History -->
+        <div class="col-lg-8">
+            <div class="glass-card mb-4">
+                <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25 pb-3 mb-4">
+                    <h5 class="mb-0 text-white font-semibold"><i class='bx bxs-card me-2 text-gradient'></i>Job Card Details</h5>
+                    
+                    <div>
+                        {% if repair.status == 'RECEIVED' %}
+                            <span class="badge bg-secondary px-3 py-2">Received</span>
+                        {% elif repair.status == 'UNDER_REPAIR' %}
+                            <span class="badge bg-warning text-dark px-3 py-2">Under Repair</span>
+                        {% elif repair.status == 'READY' %}
+                            <span class="badge bg-info text-dark px-3 py-2">Ready for Pickup</span>
+                        {% elif repair.status == 'DELIVERED' %}
+                            <span class="badge bg-success px-3 py-2">Delivered</span>
+                        {% elif repair.status == 'CANCELLED' %}
+                            <span class="badge bg-danger px-3 py-2">Cancelled</span>
+                        {% endif %}
+
+                        {% if repair.priority == 'URGENT' %}
+                            <span class="badge bg-danger ms-1 px-3 py-2">Urgent</span>
+                        {% elif repair.priority == 'VIP' %}
+                            <span class="badge bg-purple ms-1 px-3 py-2" style="background-color: #8a2be2;">VIP</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <!-- Column 1 -->
+                    <div class="col-sm-6">
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Customer</span>
+                            <strong class="text-white">{{ repair.customer.name }}</strong>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Customer Contact (At Booking)</span>
+                            <span class="text-white">{{ repair.customer_phone_snapshot|default:repair.customer.mobile_number }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Item Category</span>
+                            <span class="text-white">{{ repair.get_item_category_display }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Item Weight (Grams)</span>
+                            {% if repair.item_weight %}
+                                <span class="text-white fw-bold">{{ repair.item_weight }} g</span>
+                            {% else %}
+                                <span class="text-muted small">-</span>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Repair Type / Job</span>
+                            <span class="text-white">{{ repair.repair_type }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div class="col-sm-6">
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Expected Delivery Date</span>
+                            <span class="text-white fw-semibold {% if repair.status != 'DELIVERED' and repair.status != 'CANCELLED' and repair.expected_delivery_date < today %}text-danger fw-bold{% endif %}">
+                                {{ repair.expected_delivery_date|date:"d M Y" }}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Received Date</span>
+                            <span class="text-white">{{ repair.received_date|date:"d M Y" }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Delivered Timestamp</span>
+                            {% if repair.delivered_at %}
+                                <span class="text-success fw-bold">{{ repair.delivered_at|date:"d M Y, H:i" }}</span>
+                            {% else %}
+                                <span class="text-muted small">Not delivered yet</span>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Estimated Cost</span>
+                            <span class="text-white">₹{{ repair.estimated_cost }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Actual Cost</span>
+                            <span class="text-gradient fw-bold">₹{{ repair.actual_cost }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <span class="text-muted small d-block mb-1">Item Description</span>
+                    <div class="p-3 rounded border border-secondary border-opacity-25 bg-dark bg-opacity-50 text-white">
+                        {{ repair.item_description|linebreaksbr }}
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <span class="text-muted small d-block">Created By</span>
+                        <span class="text-white">{{ repair.created_by.username|default:"System" }}</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <span class="text-muted small d-block">Assigned Representative</span>
+                        <strong class="text-gradient">{{ repair.assigned_to.username|default:"Unassigned" }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Internal Staff Notes (Only visible here) -->
+            <div class="glass-card mb-4 border-warning border-opacity-25">
+                <h5 class="text-warning mb-3 fw-semibold"><i class='bx bxs-lock-alt me-2'></i>Internal Staff Notes</h5>
+                {% if repair.internal_notes %}
+                    <div class="p-3 rounded bg-warning bg-opacity-10 border border-warning border-opacity-20 text-white-50">
+                        {{ repair.internal_notes|linebreaksbr }}
+                    </div>
+                {% else %}
+                    <span class="text-muted small">No internal staff notes added.</span>
+                {% endif %}
+            </div>
+
+            <!-- Timeline Status History -->
+            <div class="glass-card">
+                <h5 class="mb-4 text-white"><i class='bx bx-history me-2 text-gradient'></i>Audit Trail & Progress Timeline</h5>
+                
+                <div class="timeline-wrapper">
+                    {% for log in timeline %}
+                    <div class="timeline-item d-flex gap-3 mb-4 position-relative">
+                        <div class="timeline-badge-column d-flex flex-column align-items-center">
+                            <div class="timeline-dot bg-gold rounded-circle" style="width: 12px; height: 12px;"></div>
+                            {% if not forloop.last %}
+                                <div class="timeline-line bg-secondary bg-opacity-25 flex-grow-1" style="width: 2px; min-height: 40px; margin-top: 4px;"></div>
+                            {% endif %}
+                        </div>
+                        <div class="timeline-content-card flex-grow-1 p-3 rounded border border-secondary border-opacity-25 bg-dark bg-opacity-25">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-dark border border-secondary text-white-50">
+                                    {% if log.from_status %}
+                                        {{ log.from_status|title }} ➔ {{ log.to_status|title }}
+                                    {% else %}
+                                        Initial: {{ log.to_status|title }}
+                                    {% endif %}
+                                </span>
+                                <small class="text-muted">{{ log.changed_at|date:"d M Y, H:i" }}</small>
+                            </div>
+                            {% if log.notes %}
+                                <p class="mb-1 text-white small">{{ log.notes }}</p>
+                            {% endif %}
+                            <small class="text-muted">Updated by: <strong>{{ log.changed_by.username|default:"System" }}</strong></small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <span class="text-muted">No timeline log captured.</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Photo Preview and Quick Status Update -->
+        <div class="col-lg-4">
+            <!-- Image Card -->
+            <div class="glass-card mb-4 text-center">
+                <h5 class="mb-3 text-white text-start"><i class='bx bx-image me-2 text-gradient'></i>Item Photo</h5>
+                {% if repair.item_photo %}
+                    <div class="rounded border border-secondary border-opacity-25 overflow-hidden bg-dark">
+                        <img src="{{ repair.item_photo.url }}" class="img-fluid" style="max-height: 300px; width: auto;" alt="Item Photo evidence">
+                    </div>
+                {% else %}
+                    <div class="py-5 rounded border border-dashed border-secondary border-opacity-25 bg-dark bg-opacity-50 text-muted">
+                        <i class='bx bx-image-alt fs-1 d-block mb-2'></i>
+                        No photo evidence uploaded.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Quick Status Update Card -->
+            <div class="glass-card border-info border-opacity-25">
+                <h5 class="text-info mb-3 fw-semibold"><i class='bx bx-right-arrow-circle me-2'></i>Update Status</h5>
+                
+                {% if next_status_options %}
+                    <form method="post" action="{% url 'repairs:status_update' repair.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_next_status" class="form-label text-muted small fw-bold">Next Transition State</label>
+                            <select name="status" id="id_next_status" class="form-select" required>
+                                <option value="" disabled selected>Select status...</option>
+                                {% for val, label in next_status_options %}
+                                    <option value="{{ val }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_notes" class="form-label text-muted small fw-bold">Notes / Comments</label>
+                            <textarea name="notes" id="id_notes" rows="3" class="form-control" placeholder="e.g. Completed soldering work. Loose stones tightened."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-gold w-100 fw-bold">Apply Status Update</button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-dark border-secondary border-opacity-25 mb-0" role="alert">
+                        <i class='bx bx-check-circle me-2 text-success'></i>
+                        This job has reached a terminal status (<strong>{{ repair.status|title }}</strong>). Further status updates are closed.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* CSS styles to make the timeline look perfect */
+.timeline-dot {
+    background-color: var(--gold-primary) !important;
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 0 10px var(--gold-primary);
+}
+.timeline-item:last-child .timeline-line {
+    display: none;
+}
+.bg-purple {
+    background-color: #8a2be2 !important;
+}
+</style>
+{% endblock %}

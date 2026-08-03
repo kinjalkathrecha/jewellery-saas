@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block title %}Subscription & Billing | Jewellery SaaS{% endblock %}
+
+{% block content %}
+<div class="container py-4 text-white">
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <h2 class="fw-bold mb-1"><i class='bx bxs-credit-card text-gold me-2' style="color: #d4af37;"></i>Subscription & Billing</h2>
+            <p class="text-muted mb-0">Manage your subscription plans, track usage capacity limits, and review your billing history.</p>
+        </div>
+    </div>
+
+    <!-- Alert / Status -->
+    {% if status_info %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-gold bg-opacity-10 text-gold rounded-3 p-3 me-3" style="font-size: 2rem; color: #d4af37;">
+                            <i class='bx bxs-medal'></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block text-uppercase fw-bold">Active Service status</span>
+                            <h4 class="fw-bold mb-1 text-gradient" style="background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                {{ active_sub.plan_name }} Plan
+                            </h4>
+                            <span class="badge {% if status_info.is_locked %}bg-danger{% elif status_info.status == 'TRIAL' %}bg-info text-dark{% else %}bg-success{% endif %}">
+                                {{ status_info.status }}
+                            </span>
+                            <span class="ms-2 text-muted small">{{ status_info.message }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-lg-end">
+                        <span class="text-muted small d-block">Period Ends On</span>
+                        <h5 class="fw-bold mb-0 text-white">{{ active_sub.expires_at|date:"M d, Y H:i" }}</h5>
+                        <span class="text-muted small">Billing Cycle: {{ active_sub.billing_cycle }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Plan Usage Capacity Details -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h5 class="fw-bold mb-3"><i class='bx bx-pie-chart-alt-2 text-primary me-2'></i>Plan Capacity Boundaries</h5>
+            <div class="glass-card p-4">
+                <div class="row g-4">
+                    <!-- Products -->
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Products Inventory</span>
+                            <span class="fw-bold">{{ total_products }} / {{ active_sub.max_products }}</span>
+                        </div>
+                        <div class="progress bg-dark" style="height: 10px; border-radius: 5px;">
+                            <div class="progress-bar bg-gold" style="width: {% widthratio total_products active_sub.max_products 100 %}%; background-color: #d4af37;"></div>
+                        </div>
+                        <span class="text-muted small mt-1 d-block">Maximum allowed items for cataloging.</span>
+                    </div>
+                    <!-- Users -->
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Staff / Users</span>
+                            <span class="fw-bold">{{ total_staff }} / {{ active_sub.max_users }}</span>
+                        </div>
+                        <div class="progress bg-dark" style="height: 10px; border-radius: 5px;">
+                            <div class="progress-bar bg-info" style="width: {% widthratio total_staff active_sub.max_users 100 %}%;"></div>
+                        </div>
+                        <span class="text-muted small mt-1 d-block">Includes managers, operators and admins.</span>
+                    </div>
+                    <!-- Invoices -->
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Invoices (Current Month)</span>
+                            <span class="fw-bold">{{ total_invoices_month }} / {{ active_sub.max_invoices_per_month }}</span>
+                        </div>
+                        <div class="progress bg-dark" style="height: 10px; border-radius: 5px;">
+                            <div class="progress-bar bg-success" style="width: {% widthratio total_invoices_month active_sub.max_invoices_per_month 100 %}%;"></div>
+                        </div>
+                        <span class="text-muted small mt-1 d-block">Monthly creations limit resets next month.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upgrade / Renewal Grid -->
+    <h5 class="fw-bold mb-3"><i class='bx bx-purchase-tag-alt text-warning me-2'></i>Available Subscription Plans</h5>
+    <div class="row g-4 mb-5">
+        {% for plan in plans %}
+        <div class="col-lg-4">
+            <div class="glass-card h-100 p-4 d-flex flex-column text-center {% if active_sub.plan.id == plan.id %}border border-gold shadow-gold{% endif %}" 
+                 style="background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); border-radius: 20px; transition: transform 0.2s;">
+                
+                {% if active_sub.plan.id == plan.id %}
+                <span class="badge bg-gold text-dark align-self-center mb-3 fw-bold px-3 py-1 text-uppercase" style="background-color: #d4af37;">Active Plan</span>
+                {% endif %}
+                
+                <h4 class="fw-bold mb-1">{{ plan.name }}</h4>
+                <div class="my-3">
+                    <h2 class="fw-bold mb-0 text-gold" style="color: #d4af37;">₹{{ plan.price|floatformat:0 }}</h2>
+                    <span class="text-muted small">for {{ plan.duration_days }} Days</span>
+                </div>
+                
+                <hr class="border-secondary border-opacity-50 my-3">
+                
+                <ul class="list-unstyled text-start mb-4 flex-grow-1">
+                    <li class="mb-2"><i class='bx bx-check-double text-success me-2'></i>{{ plan.max_products }} Max Products</li>
+                    <li class="mb-2"><i class='bx bx-check-double text-success me-2'></i>{{ plan.max_users }} Max Staff Accounts</li>
+                    <li class="mb-2"><i class='bx bx-check-double text-success me-2'></i>1,000 Monthly Invoices Limit</li>
+                    <li class="mb-2"><i class='bx bx-check-double text-success me-2'></i>Smart Barcode Generator strategy</li>
+                    <li class="mb-2"><i class='bx bx-check-double text-success me-2'></i>Interactive POS scanning checkout</li>
+                </ul>
+                
+                <form method="post" action="{% url 'billing:subscription_upgrade' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                    <button type="submit" class="btn {% if active_sub.plan.id == plan.id %}btn-outline-gold w-100{% else %}btn-gold w-100{% endif %} py-2 fw-bold">
+                        {% if active_sub.plan.id == plan.id %}Renew Plan{% else %}Upgrade / Select Plan{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Payment Log History -->
+    <h5 class="fw-bold mb-3"><i class='bx bx-history text-info me-2'></i>Payment Logs & Transaction History</h5>
+    <div class="glass-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 text-white" style="background-color: transparent;">
+                <thead>
+                    <tr class="bg-dark bg-opacity-50">
+                        <th>Invoice / Ref</th>
+                        <th>Plan Name</th>
+                        <th>Billing Cycle</th>
+                        <th>Transaction Amount</th>
+                        <th>Payment Status</th>
+                        <th>Reference Code</th>
+                        <th>Processed At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub_item in history %}
+                        {% for payment in sub_item.payments.all %}
+                        <tr>
+                            <td>
+                                <span class="fw-bold">{% if payment.invoice_number %}{{ payment.invoice_number }}{% else %}INV-{{ payment.id }}{% endif %}</span>
+                            </td>
+                            <td>{{ sub_item.plan_name }}</td>
+                            <td>{{ sub_item.billing_cycle }}</td>
+                            <td>₹{{ payment.amount }}</td>
+                            <td>
+                                <span class="badge bg-success">{{ payment.status }}</span>
+                            </td>
+                            <td><code class="text-gold">{{ payment.payment_reference }}</code></td>
+                            <td>{{ payment.paid_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                            {% if sub_item.status == 'TRIAL' %}
+                            <tr>
+                                <td>TRIAL-{{ sub_item.id }}</td>
+                                <td>{{ sub_item.plan_name }}</td>
+                                <td>{{ sub_item.billing_cycle }}</td>
+                                <td>₹0.00</td>
+                                <td>
+                                    <span class="badge bg-info text-dark">FREE TRIAL</span>
+                                </td>
+                                <td><code class="text-muted">N/A (TRIAL)</code></td>
+                                <td>{{ sub_item.created_at|date:"Y-m-d H:i" }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No historical billing payments found for this shop.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

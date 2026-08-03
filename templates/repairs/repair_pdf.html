@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Card {{ repair.job_card_number }}</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .shop-info h1 {
+            margin: 0 0 10px 0;
+            color: #1a1a1a;
+            font-size: 26px;
+        }
+
+        .shop-info p {
+            margin: 2px 0;
+            color: #666;
+        }
+
+        .logo {
+            max-width: 150px;
+            max-height: 80px;
+        }
+
+        .details-section table {
+            width: 100%;
+            margin-bottom: 25px;
+            border-collapse: collapse;
+        }
+
+        .details-section td {
+            padding: 8px;
+            vertical-align: top;
+            border: 1px solid #ddd;
+        }
+
+        .details-section td.label {
+            font-weight: bold;
+            background-color: #f7f7f7;
+            width: 25%;
+        }
+
+        .customer-card {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 25px;
+        }
+
+        .customer-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .photo-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .photo-container img {
+            max-width: 250px;
+            max-height: 200px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .signature-row {
+            margin-top: 80px;
+            width: 100%;
+        }
+
+        .signature-box {
+            width: 40%;
+            border-top: 1px solid #333;
+            text-align: center;
+            padding-top: 8px;
+            font-weight: bold;
+        }
+
+        .float-left {
+            float: left;
+        }
+
+        .float-right {
+            float: right;
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .terms-conditions {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            color: #555;
+            font-size: 11px;
+        }
+    </style>
+</head>
+
+<body onload="window.print()">
+    <!-- Header -->
+    <div class="header">
+        <div class="shop-info">
+            {% if repair.shop.logo %}
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ repair.shop.logo.url }}" alt="Logo" class="logo">
+            {% else %}
+            <h1>{{ repair.shop.name }}</h1>
+            {% endif %}
+            <p>{{ repair.shop.address|default:""|linebreaksbr }}</p>
+            <p>Phone: {{ repair.shop.phone_number }}</p>
+            <p>Email: {{ repair.shop.email }}</p>
+            {% if repair.shop.gstin %}
+            <p><strong>GSTIN:</strong> {{ repair.shop.gstin }}</p>
+            {% endif %}
+        </div>
+        <div class="job-title" style="text-align: right;">
+            <h1 style="color: #c5a850; font-size: 32px; margin: 0; text-transform: uppercase;">Job Card</h1>
+            <p style="font-size: 16px; margin-top: 5px;"><strong>#{{ repair.job_card_number }}</strong></p>
+            <p>Status: <strong>{{ repair.get_status_display }}</strong></p>
+        </div>
+    </div>
+
+    <!-- Customer Details -->
+    <div class="customer-card">
+        <h3>Customer Details</h3>
+        <table width="100%" style="border: none;">
+            <tr style="border: none;">
+                <td style="border: none; padding: 2px;" width="50%">
+                    <p style="margin: 0; font-size: 15px;"><strong>{{ repair.customer.name }}</strong></p>
+                    <p style="margin: 3px 0;">Phone snapshot: {{ repair.customer_phone_snapshot }}</p>
+                    {% if repair.customer.city %}
+                    <p style="margin: 3px 0;">City: {{ repair.customer.city }}</p>
+                    {% endif %}
+                </td>
+                <td style="border: none; padding: 2px; text-align: right;" width="50%">
+                    <p style="margin: 0;">Date Received: <strong>{{ repair.received_date|date:"d M Y" }}</strong></p>
+                    <p style="margin: 3px 0;">Expected Delivery: <strong style="color: #a00;">{{ repair.expected_delivery_date|date:"d M Y" }}</strong></p>
+                    {% if repair.delivered_at %}
+                    <p style="margin: 3px 0;">Actual Delivery: <strong>{{ repair.delivered_at|date:"d M Y, H:i" }}</strong></p>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Job Details -->
+    <h3 style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Item Specifications</h3>
+    <div class="details-section">
+        <table>
+            <tr>
+                <td class="label">Item Category</td>
+                <td>{{ repair.get_item_category_display }}</td>
+                <td class="label">Priority Level</td>
+                <td>
+                    {% if repair.priority == 'URGENT' %}
+                        <strong style="color: #d9534f;">Urgent</strong>
+                    {% else %}
+                        {{ repair.get_priority_display }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Item Weight</td>
+                <td>
+                    {% if repair.item_weight %}
+                        <strong>{{ repair.item_weight }} g</strong>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="label">Repair Type / Work</td>
+                <td>{{ repair.repair_type }}</td>
+            </tr>
+            <tr>
+                <td class="label">Estimated Cost</td>
+                <td>₹{{ repair.estimated_cost }}</td>
+                <td class="label">Final Billing Cost</td>
+                <td><strong>₹{{ repair.actual_cost }}</strong></td>
+            </tr>
+            <tr>
+                <td class="label">Item Description</td>
+                <td colspan="3" style="min-height: 80px;">{{ repair.item_description|linebreaksbr }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Photo Evidence (If present) -->
+    {% if repair.item_photo %}
+    <div class="photo-container">
+        <h4 style="margin-bottom: 8px; color: #555;">Visual Item Reference</h4>
+        <img src="{{ request.scheme }}://{{ request.get_host }}{{ repair.item_photo.url }}" alt="Evidence Photo">
+    </div>
+    {% endif %}
+
+    <!-- Signatures -->
+    <div class="signature-row clearfix">
+        <div class="signature-box float-left">
+            Customer Signature
+        </div>
+        <div class="signature-box float-right">
+            Authorized Signature
+        </div>
+    </div>
+
+    <!-- T&C Footer -->
+    {% if repair.shop.terms_and_conditions %}
+    <div class="terms-conditions">
+        <strong style="display:block; margin-bottom:5px;">Terms & Conditions / Guidelines:</strong>
+        <div style="font-size: 10px; color: #777;">
+            {{ repair.shop.terms_and_conditions|linebreaks }}
+        </div>
+    </div>
+    {% endif %}
+
+    <div style="text-align: center; margin-top: 40px; color: #aaa; font-size: 11px;">
+        <p>This is a system generated Job Card printout of {{ repair.shop.name }}.</p>
+    </div>
+</body>
+</html>

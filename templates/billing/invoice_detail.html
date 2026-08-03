@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Invoice #{{ object.invoice_number }} | Jewellery SaaS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Non-printable header actions -->
+    <div class="row mb-4 no-print">
+        <div class="col-lg-6">
+            <a href="{% url 'billing:invoice_list' %}" class="btn btn-outline-light"><i class='bx bx-arrow-back me-1'></i> Back to Invoices</a>
+        </div>
+        <div class="col-lg-6 text-end">
+            <a href="{% url 'billing:invoice_pdf' object.pk %}" class="btn btn-outline-light me-2" target="_blank">
+                <i class='bx bxs-file-pdf'></i> Download PDF
+            </a>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class='bx bx-printer'></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Printable Invoice Structure -->
+    <div class="row justify-content-center print-body">
+        <div class="col-lg-10">
+            <div class="glass-card invoice-container p-5 position-relative bg-white" style="background-color: #ffffff !important; color: #000 !important; border-radius: 8px;">
+                
+                <!-- Header -->
+                <div class="row mb-5 border-bottom border-secondary pb-4">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class='bx bxs-diamond text-gold fs-2 me-2' style="color: #d4af37;"></i>
+                            <h2 class="fw-bold mb-0 text-dark" style="color: #000 !important;">{{ object.shop.name }}</h2>
+                        </div>
+                        <p class="mb-0 text-dark">{{ object.shop.address|default:"Premium Jewellery Store" }}</p>
+                        <p class="mb-0 text-dark">{{ object.shop.phone_number|default:"" }} | {{ object.shop.email }}</p>
+                    </div>
+                    <div class="col-sm-6 text-sm-end mt-4 mt-sm-0">
+                        <h3 class="text-uppercase text-muted fw-bold mb-2">Invoice</h3>
+                        <p class="mb-0 fw-bold text-dark">Invoice #: <span class="text-secondary fw-normal">{{ object.invoice_number }}</span></p>
+                        <p class="mb-0 fw-bold text-dark">Date: <span class="text-secondary fw-normal">{{ object.date|date:"F d, Y" }}</span></p>
+                    </div>
+                </div>
+
+                <!-- Billing Details -->
+                <div class="row mb-5">
+                    <div class="col-sm-6">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3">Bill To:</h6>
+                        {% if object.customer %}
+                            <h5 class="fw-bold text-dark mb-1">{{ object.customer.name }}</h5>
+                            <p class="mb-0 text-dark"><i class='bx bx-phone me-1'></i> {{ object.customer.mobile_number }}</p>
+                            {% if object.customer.city %}
+                                <p class="mb-0 text-dark"><i class='bx bx-map me-1'></i> {{ object.customer.city }}</p>
+                            {% endif %}
+                        {% else %}
+                            <h5 class="fw-bold text-dark mb-1">Walking Customer</h5>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="table-responsive mb-5">
+                    <table class="table table-bordered border-secondary table-sm">
+                        <thead style="background-color: #f8f9fa;">
+                            <tr>
+                                <th class="text-center" width="5%" style="color: #000;">#</th>
+                                <th width="45%" style="color: #000;">Description</th>
+                                <th class="text-center" width="10%" style="color: #000;">Qty</th>
+                                <th class="text-end" width="20%" style="color: #000;">Rate</th>
+                                <th class="text-end" width="20%" style="color: #000;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in object.items.all %}
+                            <tr>
+                                <td class="text-center text-dark">{{ forloop.counter }}</td>
+                                <td class="text-dark">
+                                    <span class="fw-bold">{{ item.item.item_name|default:"Deleted Item" }}</span>
+                                    {% if item.item.design_code %}<br><small class="text-muted">Code: {{ item.item.design_code }}</small>{% endif %}
+                                    {% if item.invoice_metal_rate and item.invoice_metal_rate > 0 %}
+                                        <br><span class="badge bg-secondary text-white" style="font-size: 0.7rem; padding: 2px 6px;">Metal Rate Used: ₹{{ item.invoice_metal_rate }}/g</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center text-dark">{{ item.quantity }}</td>
+                                <td class="text-end text-dark">₹{{ item.rate }}</td>
+                                <td class="text-end text-dark">₹{{ item.amount }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center py-3 text-dark">No items recorded.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Totals -->
+                <div class="row justify-content-end">
+                    <div class="col-lg-4 col-md-5 col-sm-6">
+                        <table class="table table-borderless table-sm">
+                            <tbody>
+                                <tr>
+                                    <td class="text-end text-muted fw-bold">Subtotal:</td>
+                                    <td class="text-end text-dark">₹{{ object.subtotal }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-end text-muted fw-bold">Tax (GST/VAT):</td>
+                                    <td class="text-end text-dark">₹{{ object.tax_amount }}</td>
+                                </tr>
+                                <tr class="border-top border-secondary">
+                                    <td class="text-end text-dark fw-bold fs-5 pt-2">Total:</td>
+                                    <td class="text-end text-dark fw-bold fs-5 pt-2">₹{{ object.total_amount }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Footer Signature -->
+                <div class="row mt-5 pt-5">
+                    <div class="col-6">
+                        <div class="border-top border-secondary pt-2 text-center" style="width: 250px;">
+                            <span class="text-muted small">Customer Signature</span>
+                        </div>
+                    </div>
+                    <div class="col-6 d-flex justify-content-end">
+                        <div class="border-top border-secondary pt-2 text-center" style="width: 250px;">
+                            <span class="text-muted small">Authorized Signatory</span><br>
+                            <span class="fw-bold small text-dark">{{ object.shop.name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Print Media Queries */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .invoice-container, .invoice-container * {
+        visibility: visible;
+        color: #000 !important;
+    }
+    .invoice-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}

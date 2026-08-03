@@ -1,0 +1,19 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [
+    "**/migrations/*",
+    "venv/*",
+    ".git/*",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "RUF"]
+ignore = [
+    "RUF012", # Mutable default value for class attribute
+    "BLE001", # Do not catch blind exception Exception
+    "DTZ011", # datetime.date.today() used
+    "E501",   # Line too long
+    "E402",   # Module level import not at top of file
+    "RUF005", # Consider iterable unpacking instead of concatenation
+]

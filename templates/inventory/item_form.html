@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Item | Jewellery SaaS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h2 class="fw-bold mb-1">{% if object %}Edit {{ object.item_name }}{% else %}Add New Item{% endif %}</h2>
+            <p class="text-muted mb-0">Fill in the details for this jewellery piece.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <a href="{% url 'inventory:item_list' %}" class="btn btn-outline-light"><i class='bx bx-arrow-back me-1'></i> Back to Inventory</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="glass-card">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.item_name|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.design_code|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.barcode_type|as_crispy_field }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.category|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.stock_quantity|as_crispy_field }}
+                        </div>
+                    </div>
+                    
+                    <hr class="border-secondary my-4">
+                    <h5 class="text-gold mb-3 text-gradient">Metal Configuration & Pricing</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.metal_type|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.profit_margin|as_crispy_field }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.weight_in_grams|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.making_charges|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.price|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div id="dynamicPricingHelp" class="form-text text-muted mb-3 d-none">
+                        <i class='bx bx-info-circle text-gold me-1'></i> Dynamic pricing active. Selling Price = (Weight × Current Metal Rate) + Making Charges + Profit Margin.
+                    </div>
+                    <div id="noRateWarning" class="alert alert-warning py-2 mb-3 d-none" style="border: 1px solid rgba(255, 193, 7, 0.3); background-color: rgba(255, 193, 7, 0.05); color: #ffc107;">
+                        <i class='bx bx-error-circle me-1'></i> Warning: No active metal rate configured for this type. Please update rates first, otherwise price will calculate as ₹0 + fees.
+                    </div>
+
+
+                    <hr class="border-secondary my-4">
+                    <div class="mb-4">
+                        {{ form.image|as_crispy_field }}
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-gold px-5 py-2">
+                            <i class='bx bx-save me-1'></i> Save Item
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="glass-card">
+                <div class="d-flex align-items-center mb-3">
+                    <i class='bx bx-info-circle text-gold fs-4 me-2'></i>
+                    <h5 class="mb-0 text-white">Guidelines</h5>
+                </div>
+                <ul class="text-muted small ps-3">
+                    <li class="mb-2"><strong>Design Code:</strong> Use specific barcodes or your internal tagging code to make billing easier.</li>
+                    <li class="mb-2"><strong>Making Charges:</strong> Record exact making charges here for margin reports.</li>
+                    <li class="mb-2"><strong>Categories:</strong> If the dropdown is empty, you need to configure your shop's categories first via the admin interface.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Adjust label colors inside glass cards */
+.glass-card label {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+.asteriskField {
+    color: var(--danger);
+    margin-left: 2px;
+}
+.form-control[type="file"] {
+    padding: 0.375rem 0.75rem;
+    color: var(--text-muted);
+}
+.form-control[type="file"]::file-selector-button {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    border: 1px solid var(--accent);
+    margin-right: 1rem;
+    border-radius: 4px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{{ metal_rates_json|json_script:"metal-rates-data" }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rates = JSON.parse(document.getElementById('metal-rates-data').textContent);
+    
+    const metalTypeSelect = document.getElementById('id_metal_type');
+    const weightInput = document.getElementById('id_weight_in_grams');
+    const makingChargesInput = document.getElementById('id_making_charges');
+    const profitMarginInput = document.getElementById('id_profit_margin');
+    const priceInput = document.getElementById('id_price');
+    const helpText = document.getElementById('dynamicPricingHelp');
+    const warningBox = document.getElementById('noRateWarning');
+
+    function calculateSellingPrice() {
+        const metalType = metalTypeSelect.value;
+        if (metalType === 'FIXED') {
+            priceInput.readOnly = false;
+            priceInput.style.backgroundColor = '';
+            helpText.classList.add('d-none');
+            if (warningBox) warningBox.classList.add('d-none');
+            return;
+        }
+
+        // It is a dynamic metal type
+        priceInput.readOnly = true;
+        priceInput.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+        helpText.classList.remove('d-none');
+
+        const weight = parseFloat(weightInput.value) || 0.0;
+        const making = parseFloat(makingChargesInput.value) || 0.0;
+        const profit = parseFloat(profitMarginInput.value) || 0.0;
+        const rate = rates[metalType] || 0.0;
+
+        if (warningBox) {
+            if (rate === 0.0) {
+                warningBox.classList.remove('d-none');
+            } else {
+                warningBox.classList.add('d-none');
+            }
+        }
+
+        const price = (weight * rate) + making + profit;
+        priceInput.value = price.toFixed(2);
+    }
+
+    if (metalTypeSelect && weightInput && makingChargesInput && profitMarginInput && priceInput) {
+        metalTypeSelect.addEventListener('change', calculateSellingPrice);
+        weightInput.addEventListener('input', calculateSellingPrice);
+        makingChargesInput.addEventListener('input', calculateSellingPrice);
+        profitMarginInput.addEventListener('input', calculateSellingPrice);
+        
+        // Initial run
+        calculateSellingPrice();
+    }
+});
+</script>
+{% endblock %}
+

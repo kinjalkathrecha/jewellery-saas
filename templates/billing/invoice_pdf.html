@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice {{ invoice.invoice_number }}</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .shop-info h1 {
+            margin: 0 0 10px 0;
+            color: #1a1a1a;
+            font-size: 28px;
+        }
+
+        .shop-info p {
+            margin: 2px 0;
+            color: #666;
+        }
+
+        .logo {
+            max-width: 150px;
+            max-height: 80px;
+        }
+
+        .invoice-details table {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .invoice-details td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        .billing-to {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .items-table th {
+            background-color: #f4f4f4;
+            border-bottom: 2px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .items-table td {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .items-table .text-right,
+        .items-table th.text-right {
+            text-align: right;
+        }
+
+        .totals-table {
+            width: 50%;
+            float: right;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 8px 10px;
+            text-align: right;
+        }
+
+        .totals-table tr.total {
+            font-weight: bold;
+            font-size: 18px;
+            background-color: #f4f4f4;
+            border-top: 2px solid #333;
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body onload="window.print()">
+    <div class="header">
+        <div class="shop-info">
+            {% if shop.logo %}
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ shop.logo.url }}" alt="Logo" class="logo">
+            {% else %}
+            <h1>{{ shop.name }}</h1>
+            {% endif %}
+            <p>{{ shop.address|default:""|linebreaksbr }}</p>
+            <p>Phone: {{ shop.phone_number }}</p>
+            <p>Email: {{ shop.email }}</p>
+            {% if shop.gstin %}
+            <p><strong>GSTIN:</strong> {{ shop.gstin }}</p>
+            {% endif %}
+        </div>
+        <div class="invoice-title" style="text-align: right;">
+            <h1 style="color: #666; font-size: 36px; margin: 0;">INVOICE</h1>
+            <p style="font-size: 16px; margin-top: 5px;"><strong>#{{ invoice.invoice_number }}</strong></p>
+            <p>Date: {{ invoice.date }}</p>
+        </div>
+    </div>
+
+    <div class="invoice-details">
+        <table width="100%">
+            <tr>
+                <td width="50%">
+                    <div class="billing-to">
+                        <strong
+                            style="display: block; margin-bottom: 10px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Bill
+                            To:</strong>
+                        <p style="margin: 0; font-size: 16px;"><strong>{{ invoice.customer.name }}</strong></p>
+                        {% if invoice.customer.mobile_number %}
+                        <p style="margin: 3px 0;">Phone: {{ invoice.customer.mobile_number }}</p>
+                        {% endif %}
+                        {% if invoice.customer.email %}
+                        <p style="margin: 3px 0;">Email: {{ invoice.customer.email }}</p>
+                        {% endif %}
+                        {% if invoice.customer.city %}
+                        <p style="margin: 3px 0;">City: {{ invoice.customer.city }}</p>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Item Details</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Rate</th>
+                <th class="text-right">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.items.all %}
+            <tr>
+                <td>
+                    <strong>{{ item.item.item_name }}</strong><br>
+                    <span style="color: #777; font-size: 12px;">Code: {{ item.item.design_code }} | Wt: {{ item.item.weight_in_grams }}g
+                    {% if item.invoice_metal_rate and item.invoice_metal_rate > 0 %}
+                     | Metal Rate Used: ₹{{ item.invoice_metal_rate }}/g
+                    {% endif %}
+                    </span>
+                </td>
+                <td class="text-right">{{ item.quantity }}</td>
+                <td class="text-right">₹{{ item.rate }}</td>
+                <td class="text-right">₹{{ item.amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="clearfix">
+        <table class="totals-table">
+            <tr>
+                <td>Subtotal:</td>
+                <td>₹{{ invoice.subtotal }}</td>
+            </tr>
+            <tr>
+                <td>Tax Amount:</td>
+                <td>₹{{ invoice.tax_amount }}</td>
+            </tr>
+            <tr class="total">
+                <td>Total:</td>
+                <td>₹{{ invoice.total_amount }}</td>
+            </tr>
+        </table>
+    </div>
+
+    {% if shop.terms_and_conditions %}
+    <div class="footer">
+        <strong style="display:block; margin-bottom:5px;">Terms & Conditions:</strong>
+        {{ shop.terms_and_conditions|linebreaks }}
+    </div>
+    {% endif %}
+    <div style="text-align: center; margin-top: 40px; color: #aaa; font-size: 12px;">
+        <p>Thank you for your business!</p>
+    </div>
+</body>
+
+</html>

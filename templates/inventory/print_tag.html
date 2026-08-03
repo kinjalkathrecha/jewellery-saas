@@ -1,0 +1,608 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Preview | Jewellery SaaS</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Courier+Prime&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Boxicons -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    
+    <!-- Local JS assets -->
+    <script src="{% static 'js/qrious.js' %}"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #12131c;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --gold: #d4af37;
+            --text-muted: #8e90a6;
+            
+            /* Print Calibration Settings */
+            --margin-top: 0mm;
+            --margin-bottom: 0mm;
+            --margin-left: 0mm;
+            --margin-right: 0mm;
+            --print-dpi: 300;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sidebar Control Panel */
+        .controls-sidebar {
+            width: 320px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #171926;
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Preview Workspace */
+        .preview-workspace {
+            margin-left: 320px;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: var(--bg-dark);
+        }
+
+        .preview-container {
+            background-color: #fff;
+            color: #000;
+            padding: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            min-width: 210mm; /* A4 width standard or custom page sizes */
+            min-height: 297mm;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Calibration Grid Overlay */
+        .calibration-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(0, 100, 255, 0.15) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 100, 255, 0.15) 1px, transparent 1px),
+                linear-gradient(to right, rgba(0, 100, 255, 0.3) 10px, transparent 10px),
+                linear-gradient(to bottom, rgba(0, 100, 255, 0.3) 10px, transparent 10px);
+            background-size: 1mm 1mm, 1mm 1mm, 10mm 10mm, 10mm 10mm;
+            pointer-events: none;
+            display: none;
+            z-index: 50;
+        }
+
+        /* Label Print Templates Styling */
+        .print-queue {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5mm;
+            justify-content: flex-start;
+            align-content: flex-start;
+            box-sizing: border-box;
+        }
+
+        .label-card {
+            border: 1px dashed #bbb;
+            box-sizing: border-box;
+            position: relative;
+            background-color: #fff;
+            page-break-inside: avoid;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Template 1: Classic (50x25mm) */
+        .template-classic {
+            width: 50mm;
+            height: 25mm;
+            padding: 1.5mm;
+            font-size: 8pt;
+        }
+        .template-classic .label-header {
+            font-weight: bold;
+            font-size: 7.5pt;
+            border-bottom: 0.5px solid #000;
+            padding-bottom: 0.5mm;
+            margin-bottom: 1mm;
+            display: flex;
+            justify-content: space-between;
+        }
+        .template-classic .barcode-container {
+            text-align: center;
+            height: 8mm;
+        }
+        .template-classic .barcode-container svg {
+            width: 100%;
+            height: 100%;
+        }
+        .template-classic .details-row {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Outfit', sans-serif;
+            font-size: 7pt;
+        }
+
+        /* Template 2: Medium (75x50mm) */
+        .template-medium {
+            width: 75mm;
+            height: 50mm;
+            padding: 3mm;
+            font-size: 10pt;
+        }
+        .template-medium .label-header {
+            font-weight: bold;
+            font-size: 11pt;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1mm;
+            margin-bottom: 2mm;
+            text-transform: uppercase;
+        }
+        .template-medium .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5mm;
+            font-size: 9pt;
+        }
+        .template-medium .barcode-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 3mm;
+        }
+        .template-medium .barcode-container {
+            width: 70%;
+            height: 12mm;
+        }
+        .template-medium .barcode-container svg {
+            width: 100%;
+            height: 100%;
+        }
+        .template-medium .qr-container {
+            width: 25%;
+            text-align: right;
+        }
+
+        /* Template 3: Luxury (Gold Minimal Theme) */
+        .template-luxury {
+            width: 50mm;
+            height: 25mm;
+            padding: 1.5mm;
+            border: 1.5px solid #000;
+            border-radius: 6px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 8pt;
+        }
+        .template-luxury .label-header {
+            font-weight: bold;
+            font-size: 8pt;
+            letter-spacing: 0.5px;
+            text-align: center;
+            border-bottom: 1px double #000;
+            margin-bottom: 1mm;
+        }
+        .template-luxury .barcode-container {
+            height: 7mm;
+            text-align: center;
+        }
+        .template-luxury .barcode-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Template 4: Dumbbell Loop Tag (Jewellery Loop Tag) */
+        .template-dumbbell {
+            width: 65mm;
+            height: 25mm;
+            border: none;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0;
+            background: transparent;
+        }
+        .dumbbell-wing-left {
+            width: 26mm;
+            height: 25mm;
+            border: 1px solid #000;
+            border-radius: 4px;
+            padding: 1.5mm;
+            box-sizing: border-box;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 7.5pt;
+        }
+        .dumbbell-loop {
+            width: 13mm;
+            height: 2.5mm;
+            border-top: 1px dashed #000;
+            border-bottom: 1px dashed #000;
+            background-color: transparent;
+            box-sizing: border-box;
+        }
+        .dumbbell-wing-right {
+            width: 26mm;
+            height: 25mm;
+            border: 1px solid #000;
+            border-radius: 4px;
+            padding: 1.5mm;
+            box-sizing: border-box;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dumbbell-wing-right .barcode-container {
+            width: 100%;
+            height: 7mm;
+        }
+        .dumbbell-wing-right .barcode-container svg {
+            width: 100%;
+            height: 100%;
+        }
+        .dumbbell-wing-right .qr-container {
+            margin-top: 0.5mm;
+        }
+
+        /* Sidebar UI formatting */
+        .control-group {
+            margin-bottom: 20px;
+        }
+        .control-group label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .glass-btn {
+            background-color: var(--gold);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+        .glass-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .alert-info-glass {
+            background-color: rgba(13, 202, 240, 0.05);
+            border: 1px solid rgba(13, 202, 240, 0.15);
+            color: #0dcaf0;
+            font-size: 0.8rem;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        /* Print Media Specific CSS */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: #fff !important;
+                color: #000 !important;
+            }
+            .preview-workspace {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+            .preview-container {
+                box-shadow: none !important;
+                padding: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left) !important;
+                margin: 0 !important;
+                min-width: 0 !important;
+                min-height: 0 !important;
+            }
+            .label-card {
+                border: none !important; /* Remove borders when printing actual labels */
+            }
+            .dumbbell-wing-left, .dumbbell-wing-right {
+                border: 0.5px solid #000 !important;
+            }
+            .dumbbell-loop {
+                border-top: 0.5px dashed #000 !important;
+                border-bottom: 0.5px dashed #000 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Control Panel -->
+    <div class="controls-sidebar no-print">
+        <h4 class="fw-bold mb-1 text-white">Print Labels</h4>
+        <p class="text-muted small mb-4">Calibrate and print jewelry barcode tags</p>
+
+        <!-- Template Selector -->
+        <div class="control-group">
+            <label for="templateSelector"><i class='bx bx-layout me-1 text-gold'></i> Select Template</label>
+            <select id="templateSelector" class="form-select bg-dark text-white border-secondary">
+                {% for t in templates %}
+                    <option value="{{ t.slug }}" data-width="{{ t.width_mm }}" data-height="{{ t.height_mm }}">{{ t.name }} ({{ t.width_mm }}x{{ t.height_mm }}mm)</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <hr class="border-secondary my-3">
+
+        <!-- Calibration Margins -->
+        <h6 class="text-white fw-bold mb-3"><i class='bx bx-slider me-1 text-gold'></i> Calibration Margins</h6>
+        <div class="row">
+            <div class="col-6 control-group">
+                <label>Top (mm)</label>
+                <input type="number" id="marginTop" class="form-control bg-dark text-white border-secondary" value="0" step="0.5">
+            </div>
+            <div class="col-6 control-group">
+                <label>Bottom (mm)</label>
+                <input type="number" id="marginBottom" class="form-control bg-dark text-white border-secondary" value="0" step="0.5">
+            </div>
+            <div class="col-6 control-group">
+                <label>Left (mm)</label>
+                <input type="number" id="marginLeft" class="form-control bg-dark text-white border-secondary" value="0" step="0.5">
+            </div>
+            <div class="col-6 control-group">
+                <label>Right (mm)</label>
+                <input type="number" id="marginRight" class="form-control bg-dark text-white border-secondary" value="0" step="0.5">
+            </div>
+        </div>
+
+        <!-- DPI & Options -->
+        <div class="control-group">
+            <label for="printerDpi"><i class='bx bx-printer me-1 text-gold'></i> Printer Resolution (DPI)</label>
+            <select id="printerDpi" class="form-select bg-dark text-white border-secondary">
+                <option value="203">203 DPI (Standard Thermal)</option>
+                <option value="300" selected>300 DPI (High Res Thermal)</option>
+            </select>
+        </div>
+
+        <div class="form-check form-switch control-group mt-3">
+            <input class="form-check-input" type="checkbox" id="toggleGrid">
+            <label class="form-check-label text-white" for="toggleGrid">Show Calibration Grid Overlay</label>
+        </div>
+
+        <button onclick="window.print()" class="glass-btn mt-4">
+            <i class='bx bx-printer fs-5'></i> Print Labels
+        </button>
+
+        <div class="alert-info-glass">
+            <i class='bx bx-info-circle me-1'></i> <strong>Tip:</strong> Set page margins to "None" and background graphics to "Enabled" in browser printing dialog.
+        </div>
+    </div>
+
+    <!-- Preview Workspace -->
+    <div class="preview-workspace">
+        <div class="preview-container" id="pageContainer">
+            <!-- Calibration Grid Overlay -->
+            <div class="calibration-grid" id="gridOverlay"></div>
+            
+            <!-- Labels list -->
+            <div class="print-queue" id="printQueue">
+                {% for item in items %}
+                    <div class="label-card template-classic" data-sku="{{ item.design_code }}" data-uuid="{{ item.uuid }}">
+                        
+                        <!-- Template 1: Classic Tag Template content -->
+                        <div class="classic-content w-100 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="label-header">
+                                    <span>{% if request.shop %}{{ request.shop.name }}{% else %}Jewellery Shop{% endif %}</span>
+                                    <span>{{ item.get_metal_type_display }}</span>
+                                </div>
+                                <div class="fw-bold" style="font-size: 7.5pt; white-space: nowrap; overflow: hidden;">{{ item.item_name }}</div>
+                                <div class="details-row text-muted mt-0.5">
+                                    <span>Wt: <strong>{{ item.weight_in_grams }}g</strong></span>
+                                    <span>SKU: <strong>{{ item.design_code }}</strong></span>
+                                </div>
+                            </div>
+                            <div class="barcode-container">
+                                {{ item.barcode_svg|safe }}
+                            </div>
+                        </div>
+
+                        <!-- Template 2: Medium Label Template content (Hidden by default unless selected) -->
+                        <div class="medium-content w-100 h-100 d-flex flex-column justify-content-between d-none">
+                            <div>
+                                <div class="label-header d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold">{% if request.shop %}{{ request.shop.name }}{% else %}Jewellery Shop{% endif %}</span>
+                                    <span class="badge bg-dark text-white rounded-0 px-2">{{ item.get_metal_type_display }}</span>
+                                </div>
+                                <h6 class="fw-bold mb-2">{{ item.item_name }}</h6>
+                                <div class="details-grid">
+                                    <div>SKU: <strong>{{ item.design_code }}</strong></div>
+                                    <div>Weight: <strong>{{ item.weight_in_grams }} g</strong></div>
+                                    <div>Category: <strong>{{ item.category.name|default:"General" }}</strong></div>
+                                    <div>Purity: <strong>{{ item.get_metal_type_display }}</strong></div>
+                                </div>
+                            </div>
+                            <div class="barcode-section">
+                                <div class="barcode-container">
+                                    {{ item.barcode_svg|safe }}
+                                </div>
+                                <div class="qr-container">
+                                    <canvas id="qr-med-{{ item.id }}" class="qr-code-canvas" data-value="{{ item.uuid }}"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Template 3: Luxury gold border (Hidden by default) -->
+                        <div class="luxury-content w-100 h-100 d-flex flex-column justify-content-between d-none">
+                            <div>
+                                <div class="label-header">
+                                    {% if request.shop %}{{ request.shop.name }}{% else %}Jewellery Shop{% endif %}
+                                </div>
+                                <div class="text-center fw-bold mb-1">{{ item.item_name }}</div>
+                                <div class="d-flex justify-content-around text-muted" style="font-size: 7.5pt;">
+                                    <span>{{ item.weight_in_grams }}g</span>
+                                    <span>{{ item.get_metal_type_display }}</span>
+                                    <span>{{ item.design_code }}</span>
+                                </div>
+                            </div>
+                            <div class="barcode-container">
+                                {{ item.barcode_svg|safe }}
+                            </div>
+                        </div>
+
+                        <!-- Template 4: Jewellery Dumbbell Loop Tag (Hidden by default) -->
+                        <div class="dumbbell-content w-100 h-100 d-flex align-items-center justify-content-between d-none">
+                            <!-- Left Wing (Specs) -->
+                            <div class="dumbbell-wing-left">
+                                <div class="fw-bold text-truncate" style="border-bottom: 0.5px solid #000; padding-bottom: 0.5mm; font-size: 7pt;">
+                                    {% if request.shop %}{{ request.shop.name }}{% else %}Jewells{% endif %}
+                                </div>
+                                <div style="font-size: 6.5pt; font-weight: bold;" class="text-truncate">{{ item.item_name }}</div>
+                                <div style="font-size: 6pt;">
+                                    <div>Wt: <strong>{{ item.weight_in_grams }}g</strong></div>
+                                    <div>Purity: <strong>{{ item.get_metal_type_display }}</strong></div>
+                                </div>
+                            </div>
+
+                            <!-- Narrow bridge loop -->
+                            <div class="dumbbell-loop"></div>
+
+                            <!-- Right Wing (Barcode & QR) -->
+                            <div class="dumbbell-wing-right">
+                                <div class="barcode-container">
+                                    {{ item.barcode_svg|safe }}
+                                </div>
+                                <div class="qr-container">
+                                    <canvas id="qr-dumb-{{ item.id }}" class="qr-code-canvas" data-value="{{ item.uuid }}"></canvas>
+                                </div>
+                                <div style="font-size: 6.5pt; font-weight: bold; margin-top: 0.5mm;">{{ item.design_code }}</div>
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Script to update template styling dynamically -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const templateSelector = document.getElementById('templateSelector');
+            const marginTopInput = document.getElementById('marginTop');
+            const marginBottomInput = document.getElementById('marginBottom');
+            const marginLeftInput = document.getElementById('marginLeft');
+            const marginRightInput = document.getElementById('marginRight');
+            const printerDpi = document.getElementById('printerDpi');
+            const toggleGrid = document.getElementById('toggleGrid');
+            
+            const gridOverlay = document.getElementById('gridOverlay');
+            const printQueue = document.getElementById('printQueue');
+            const labelCards = document.querySelectorAll('.label-card');
+
+            // 1. Manage Margin Changes
+            function updateMargins() {
+                document.documentElement.style.setProperty('--margin-top', marginTopInput.value + 'mm');
+                document.documentElement.style.setProperty('--margin-bottom', marginBottomInput.value + 'mm');
+                document.documentElement.style.setProperty('--margin-left', marginLeftInput.value + 'mm');
+                document.documentElement.style.setProperty('--margin-right', marginRightInput.value + 'mm');
+            }
+
+            [marginTopInput, marginBottomInput, marginLeftInput, marginRightInput].forEach(input => {
+                input.addEventListener('input', updateMargins);
+            });
+
+            // 2. Manage Grid Toggle
+            toggleGrid.addEventListener('change', function() {
+                gridOverlay.style.display = this.checked ? 'block' : 'none';
+            });
+
+            // 3. Manage Template Changes
+            function updateTemplate() {
+                const selectedSlug = templateSelector.value;
+
+                labelCards.forEach(card => {
+                    // Remove all template classes
+                    card.className = 'label-card';
+                    card.classList.add('template-' + selectedSlug);
+
+                    // Show matching content block and hide others
+                    const contents = {
+                        'classic': card.querySelector('.classic-content'),
+                        'medium': card.querySelector('.medium-content'),
+                        'luxury': card.querySelector('.luxury-content'),
+                        'dumbbell': card.querySelector('.dumbbell-content')
+                    };
+
+                    Object.keys(contents).forEach(key => {
+                        const contentBlock = contents[key];
+                        if (contentBlock) {
+                            if (key === selectedSlug) {
+                                contentBlock.classList.remove('d-none');
+                            } else {
+                                contentBlock.classList.add('d-none');
+                            }
+                        }
+                    });
+                });
+            }
+
+            templateSelector.addEventListener('change', updateTemplate);
+
+            // 4. Initialize QR codes dynamically using QRious
+            // Dynamic URL redirect for QR codes: http://<domain>/p/<uuid>/
+            const canvasList = document.querySelectorAll('.qr-code-canvas');
+            canvasList.forEach(canvas => {
+                const itemUuid = canvas.getAttribute('data-value');
+                const qrUrl = window.location.origin + '/p/' + itemUuid + '/';
+                
+                // Set sizes based on whether it is medium template or dumbbell template
+                const isDumbbell = canvas.id.includes('dumb');
+                const qrSize = isDumbbell ? 38 : 50;
+
+                new QRious({
+                    element: canvas,
+                    value: qrUrl,
+                    size: qrSize,
+                    level: 'L'
+                });
+            });
+
+            // Initial setup run
+            updateMargins();
+            updateTemplate();
+        });
+    </script>
+</body>
+</html>
