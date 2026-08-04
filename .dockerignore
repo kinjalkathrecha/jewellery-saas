@@ -1,0 +1,40 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local dependencies and environments
+venv/
+.env
+.env.*
+
+# Local databases and logs
+db.sqlite3
+logs/
+*.log
+
+# Media and collected assets
+media/
+staticfiles/
+
+# Version control and IDEs
+.git/
+.gitignore
+.github/
+.vscode/
+.idea/
+.project
+.pydevproject
+
+# Backups and reports
+backup_before_pg.json
+project_report.md
+walkthrough.md
+implementation_plan.md
+task.md

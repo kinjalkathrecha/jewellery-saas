@@ -7,11 +7,32 @@ from billing.models import Invoice
 from customers.models import Customer
 from inventory.models import JewelleryItem
 from repairs.models import Repair
+from accounts.models import CustomUser
 
+
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from core.services import cache_service
+
+@receiver([post_save, post_delete], sender=JewelleryItem)
+@receiver([post_save, post_delete], sender=Invoice)
+@receiver([post_save, post_delete], sender=Customer)
+@receiver([post_save, post_delete], sender=Repair)
+@receiver([post_save, post_delete], sender=CustomUser)
+def invalidate_dashboard_cache(sender, instance, **kwargs):
+    shop_id = getattr(instance, "shop_id", None)
+    if shop_id:
+        cache_service.invalidate_dashboard(shop_id)
 
 @login_required
 def home(request):
     shop = request.shop
+
+    cached_context = cache_service.get_dashboard_stats(shop.id)
+    if cached_context is not None:
+        # Dynamically refresh active subscription object from current request context
+        cached_context["sub"] = shop.active_subscription
+        return render(request, "dashboard/home.html", cached_context)
 
     # Context stats
     total_products = JewelleryItem.objects.filter(shop=shop).count()
@@ -22,8 +43,8 @@ def home(request):
 
     low_stock_query = JewelleryItem.objects.filter(shop=shop, stock_quantity__lte=5)
     low_stock_count = low_stock_query.count()
-    low_stock_items = low_stock_query[:5]
-    recent_invoices = Invoice.objects.filter(shop=shop).select_related("customer").order_by("-created_at")[:5]
+    low_stock_items = list(low_stock_query[:5])
+    recent_invoices = list(Invoice.objects.filter(shop=shop).select_related("customer").order_by("-created_at")[:5])
 
     # Repairs Stats
     repairs_pending = Repair.objects.filter(shop=shop, status__in=["RECEIVED", "UNDER_REPAIR"], is_active=True).count()
@@ -77,8 +98,6 @@ def home(request):
     max_invoices = sub.max_invoices_per_month if sub else 1000
 
     # Staff count (total users under shop)
-    from accounts.models import CustomUser
-
     total_staff = CustomUser.objects.filter(shop=shop).count()
 
     # Monthly invoice count
@@ -116,7 +135,9 @@ def home(request):
         "staff_percent": staff_percent,
         "invoice_percent": invoice_percent,
     }
+    cache_service.set_dashboard_stats(shop.id, context)
     return render(request, "dashboard/home.html", context)
+
 
 
 from django.contrib import messages

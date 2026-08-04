@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     # Third-party apps
     "crispy_forms",
     "crispy_bootstrap5",
+    "django_celery_beat",
     # Local apps
     "core",
     "accounts",
@@ -46,7 +47,9 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
+    "core.middleware.CorrelationIdMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -110,6 +113,15 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "jewellery_saas.storage.SafeCompressedManifestStaticFilesStorage",
+    },
+}
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -137,6 +149,9 @@ LOGGING = {
             "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
             "style": "{",
         },
+        "json": {
+            "()": "jewellery_saas.logging.JSONFormatter",
+        },
     },
     "handlers": {
         "django_file": {
@@ -145,7 +160,7 @@ LOGGING = {
             "filename": LOGS_DIR / "django.log",
             "maxBytes": 1024 * 1024 * 5,  # 5 MB limit
             "backupCount": 5,  # Keep up to 5 rotation files
-            "formatter": "verbose",
+            "formatter": "json",
         },
         "errors_file": {
             "level": "ERROR",
@@ -153,7 +168,7 @@ LOGGING = {
             "filename": LOGS_DIR / "errors.log",
             "maxBytes": 1024 * 1024 * 5,  # 5 MB limit
             "backupCount": 5,  # Keep up to 5 rotation files
-            "formatter": "verbose",
+            "formatter": "json",
         },
     },
     "loggers": {
@@ -164,3 +179,71 @@ LOGGING = {
         },
     },
 }
+
+# Caching & Session Backend (django-redis fallback to local memory in dev/tests if REDIS_URL is unset)
+REDIS_URL = env.str("REDIS_URL", default="")
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        }
+    }
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+# Celery Configurations
+CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", default="redis://localhost:6379/1" if REDIS_URL else "")
+CELERY_RESULT_BACKEND = env.str("CELERY_RESULT_BACKEND", default="redis://localhost:6379/1" if REDIS_URL else "")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Kolkata"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# Celery Beat Scheduler configuration
+CELERY_BEAT_SCHEDULE = {
+    "check-subscriptions-daily": {
+        "task": "core.tasks.check_subscriptions_task",
+        "schedule": 86400.0,  # 24 hours
+        "options": {"queue": "subscriptions"},
+    },
+    "database-backup-daily": {
+        "task": "core.tasks.backup_database_task",
+        "schedule": 86400.0,  # 24 hours
+        "options": {"queue": "backups"},
+    },
+}
+
+# Explicit task queue routing configuration
+CELERY_TASK_ROUTES = {
+    "core.tasks.send_invoice_email_task": {"queue": "emails"},
+    "core.tasks.check_subscriptions_task": {"queue": "subscriptions"},
+    "core.tasks.backup_database_task": {"queue": "backups"},
+    "core.tasks.handle_failed_task": {"queue": "failed"},
+}
+
+
+# Email configurations for Mailhog and Production
+EMAIL_BACKEND = env.str("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env.str("EMAIL_HOST", default="localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", default=1025)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="no-reply@aureate.com")
+
+# Application version configuration
+APP_VERSION = env.str("APP_VERSION", default="0.96")
+
+
