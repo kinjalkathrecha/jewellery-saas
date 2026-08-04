@@ -1,4 +1,5 @@
 import os
+
 from celery import Celery
 
 # Set default Django settings module
@@ -13,6 +14,7 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 from celery.signals import task_failure
+
 
 @task_failure.connect
 def handle_task_failure(sender=None, task_id=None, exception=None, args=None, kwargs=None, traceback=None, einfo=None, **extra):

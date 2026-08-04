@@ -1,7 +1,10 @@
-import logging
 import json
+import logging
+
 from django.utils import timezone
+
 from core.middleware import get_current_request_id
+
 
 class JSONFormatter(logging.Formatter):
     """

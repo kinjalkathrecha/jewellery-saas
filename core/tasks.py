@@ -1,12 +1,13 @@
-import os
-import subprocess
 import gzip
 import logging
+import os
+import subprocess
+from datetime import timedelta
+
 from celery import shared_task
+from django.conf import settings
 from django.core.mail import send_mail
 from django.utils import timezone
-from django.conf import settings
-from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
+
 from core.decorators import redis_rate_limit
 
 from . import views

@@ -1,10 +1,12 @@
 import pytest
 from django.core.cache import cache
 from django.utils import timezone
-from tests.factories.shop import ShopFactory
-from tests.factories.subscriptions import SubscriptionPlanFactory, SubscriptionFactory
-from inventory.models import MetalRate
+
 from core.services import cache_service
+from inventory.models import MetalRate
+from tests.factories.shop import ShopFactory
+from tests.factories.subscriptions import SubscriptionFactory, SubscriptionPlanFactory
+
 
 @pytest.mark.django_db
 class TestCachingService:

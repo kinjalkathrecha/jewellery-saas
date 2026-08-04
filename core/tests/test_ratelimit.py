@@ -2,6 +2,7 @@ import pytest
 from django.core.cache import cache
 from django.urls import reverse
 
+
 @pytest.mark.django_db
 class TestRateLimiting:
     def setup_method(self):

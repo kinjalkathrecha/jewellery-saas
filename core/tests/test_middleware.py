@@ -1,6 +1,7 @@
 import pytest
 from django.urls import reverse
 
+
 @pytest.mark.django_db
 def test_correlation_id_middleware(client):
     url = reverse("accounts:login")

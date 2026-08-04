@@ -1,5 +1,6 @@
 from whitenoise.storage import CompressedManifestStaticFilesStorage
 
+
 class SafeCompressedManifestStaticFilesStorage(CompressedManifestStaticFilesStorage):
     """
     Subclass of WhiteNoise's CompressedManifestStaticFilesStorage that disables

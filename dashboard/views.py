@@ -1,18 +1,17 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, DurationField, ExpressionWrapper, F, Sum
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from django.shortcuts import render
 from django.utils import timezone
 
+from accounts.models import CustomUser
 from billing.models import Invoice
+from core.services import cache_service
 from customers.models import Customer
 from inventory.models import JewelleryItem
 from repairs.models import Repair
-from accounts.models import CustomUser
 
-
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
-from core.services import cache_service
 
 @receiver([post_save, post_delete], sender=JewelleryItem)
 @receiver([post_save, post_delete], sender=Invoice)

@@ -1,9 +1,10 @@
+from celery import current_app
+from django.conf import settings
+from django.core.cache import cache
 from django.db import connection
 from django.http import JsonResponse
-from django.conf import settings
 from django.utils import timezone
-from django.core.cache import cache
-from celery import current_app
+
 
 def health_check(request):
     """
@@ -22,7 +23,7 @@ def health_check(request):
             cursor.execute("SELECT 1")
         database_ok = "ok"
     except Exception as e:
-        database_ok = f"error: {str(e)}"
+        database_ok = f"error: {e!s}"
 
     # 2. Probe Redis
     try:
@@ -30,7 +31,7 @@ def health_check(request):
         if cache.get("health_probe_key") == "ok":
             redis_ok = "ok"
     except Exception as e:
-        redis_ok = f"error: {str(e)}"
+        redis_ok = f"error: {e!s}"
 
     # 3. Probe Celery
     try:
@@ -43,19 +44,19 @@ def health_check(request):
         else:
             celery_ok = "no_workers"
     except Exception as e:
-        celery_ok = f"error: {str(e)}"
+        celery_ok = f"error: {e!s}"
 
     # 4. Probe Storage
     try:
-        from django.core.files.storage import default_storage
         from django.core.files.base import ContentFile
+        from django.core.files.storage import default_storage
         test_file_path = "health_probe_test.txt"
         default_storage.save(test_file_path, ContentFile(b"ok"))
         if default_storage.exists(test_file_path):
             default_storage.delete(test_file_path)
             storage_ok = "ok"
     except Exception as e:
-        storage_ok = f"error: {str(e)}"
+        storage_ok = f"error: {e!s}"
 
     # Determine overall status
     is_healthy = (

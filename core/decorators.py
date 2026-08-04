@@ -1,8 +1,8 @@
-import time
 import functools
 import logging
+
 from django.core.cache import cache
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 logger = logging.getLogger(__name__)
 

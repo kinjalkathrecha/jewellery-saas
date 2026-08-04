@@ -2,6 +2,7 @@ import os
 import sys
 import time
 
+
 def check_db():
     dbname = os.environ.get("DB_NAME")
     user = os.environ.get("DB_USER")

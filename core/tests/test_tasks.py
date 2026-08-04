@@ -1,11 +1,14 @@
-import pytest
+from datetime import timedelta
 from unittest.mock import patch
+
+import pytest
 from django.core import mail
 from django.utils import timezone
-from datetime import timedelta
+
+from core.tasks import check_subscriptions_task, send_invoice_email_task
 from tests.factories.shop import ShopFactory
-from tests.factories.subscriptions import SubscriptionPlanFactory, SubscriptionFactory
-from core.tasks import send_invoice_email_task, check_subscriptions_task
+from tests.factories.subscriptions import SubscriptionFactory, SubscriptionPlanFactory
+
 
 @pytest.mark.django_db
 class TestCeleryTasks:
