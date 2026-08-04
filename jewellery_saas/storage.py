@@ -8,4 +8,5 @@ class SafeCompressedManifestStaticFilesStorage(CompressedManifestStaticFilesStor
     development or test runs where collectstatic has not been run), it falls back gracefully
     to serving the unhashed file instead of raising a ValueError.
     """
+
     manifest_strict = False

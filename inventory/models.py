@@ -37,6 +37,7 @@ class MetalRate(models.Model):
     @classmethod
     def get_current_rate(cls, shop, metal_type):
         from core.services import cache_service
+
         cached_rate = cache_service.get_metal_rate(shop.id, metal_type)
         if cached_rate is not None:
             return cached_rate
@@ -51,6 +52,7 @@ class MetalRate(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         from core.services import cache_service
+
         cache_service.invalidate_rates(self.shop.id, self.metal_type)
 
     def delete(self, *args, **kwargs):
@@ -58,6 +60,7 @@ class MetalRate(models.Model):
         metal_type = self.metal_type
         super().delete(*args, **kwargs)
         from core.services import cache_service
+
         cache_service.invalidate_rates(shop_id, metal_type)
 
     def __str__(self):

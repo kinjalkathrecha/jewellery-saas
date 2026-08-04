@@ -26,11 +26,13 @@ import uuid
 
 _thread_locals = threading.local()
 
+
 def get_current_request_id():
     """
     Retrieve the current request's unique correlation ID from thread-local storage.
     """
     return getattr(_thread_locals, "request_id", None)
+
 
 class CorrelationIdMiddleware(MiddlewareMixin):
     """
@@ -38,6 +40,7 @@ class CorrelationIdMiddleware(MiddlewareMixin):
     If one is passed in headers from Nginx (X-Correlation-ID), it uses it;
     otherwise it generates a fresh UUID.
     """
+
     def process_request(self, request):
         correlation_id = request.META.get("HTTP_X_CORRELATION_ID") or request.META.get("HTTP_X_REQUEST_ID")
         if not correlation_id:
@@ -51,4 +54,3 @@ class CorrelationIdMiddleware(MiddlewareMixin):
         if hasattr(_thread_locals, "request_id"):
             del _thread_locals.request_id
         return response
-

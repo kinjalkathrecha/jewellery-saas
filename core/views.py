@@ -50,6 +50,7 @@ def health_check(request):
     try:
         from django.core.files.base import ContentFile
         from django.core.files.storage import default_storage
+
         test_file_path = "health_probe_test.txt"
         default_storage.save(test_file_path, ContentFile(b"ok"))
         if default_storage.exists(test_file_path):
@@ -60,19 +61,19 @@ def health_check(request):
 
     # Determine overall status
     is_healthy = (
-        database_ok == "ok" and
-        redis_ok == "ok" and
-        (celery_ok == "ok" or celery_ok == "no_workers") and
-        storage_ok == "ok"
+        database_ok == "ok"
+        and redis_ok == "ok"
+        and (celery_ok == "ok" or celery_ok == "no_workers")
+        and storage_ok == "ok"
     )
 
     # Expose operational metrics (prepared for Prometheus/monitoring hooks)
     metrics = {
         "active_celery_workers": active_workers,
-        "pending_tasks": 0,                 # Extensible: query queue lengths later
-        "redis_memory_usage_bytes": 0,       # Extensible: query Redis INFO memory later
-        "cache_hit_ratio": 1.0,             # Extensible: query hit ratios later
-        "database_connections": 1           # Extensible: query active connections count later
+        "pending_tasks": 0,  # Extensible: query queue lengths later
+        "redis_memory_usage_bytes": 0,  # Extensible: query Redis INFO memory later
+        "cache_hit_ratio": 1.0,  # Extensible: query hit ratios later
+        "database_connections": 1,  # Extensible: query active connections count later
     }
 
     # Fetch app version from settings
@@ -91,4 +92,3 @@ def health_check(request):
 
     status_code = 200 if is_healthy else 503
     return JsonResponse(response_data, status=status_code)
-

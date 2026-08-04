@@ -18,10 +18,7 @@ class TestCachingService:
     def test_metal_rate_caching(self):
         # Create a metal rate
         rate1 = MetalRate.objects.create(
-            shop=self.shop,
-            metal_type="GOLD_24K",
-            rate_per_gram=100.00,
-            effective_from=timezone.now()
+            shop=self.shop, metal_type="GOLD_24K", rate_per_gram=100.00, effective_from=timezone.now()
         )
 
         # First lookup: fetches from DB and caches it
@@ -53,7 +50,7 @@ class TestCachingService:
             expires_at=timezone.now() + timezone.timedelta(days=30),
             max_products=1000,
             max_users=3,
-            duration_days=30
+            duration_days=30,
         )
         self.shop.active_subscription = sub
         self.shop.save()

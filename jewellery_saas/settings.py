@@ -189,7 +189,7 @@ if REDIS_URL:
             "LOCATION": REDIS_URL,
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            }
+            },
         }
     }
     SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -245,5 +245,3 @@ DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="no-reply@aureate.com
 
 # Application version configuration
 APP_VERSION = env.str("APP_VERSION", default="0.96")
-
-

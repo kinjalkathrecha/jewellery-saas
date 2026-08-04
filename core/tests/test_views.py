@@ -11,9 +11,7 @@ from django.urls import reverse
 @patch("django.core.files.storage.default_storage.exists")
 @patch("django.core.files.storage.default_storage.delete")
 @patch("core.views.current_app.control.inspect")
-def test_health_check_success(
-    mock_celery_inspect, mock_delete, mock_exists, mock_save, mock_set, mock_get, client
-):
+def test_health_check_success(mock_celery_inspect, mock_delete, mock_exists, mock_save, mock_set, mock_get, client):
     """
     Test that when all backends (DB, Redis, Celery, Storage) are functional,
     the endpoint returns 200 and 'healthy' status.
@@ -42,6 +40,7 @@ def test_health_check_success(
     assert "metrics" in data
     assert data["metrics"]["active_celery_workers"] == 1
 
+
 @pytest.mark.django_db
 @patch("core.views.connection.cursor")
 @patch("django.core.cache.cache.get")
@@ -60,21 +59,23 @@ def test_health_check_failure(
     from django.db import connections
     from django.db.backends.base.base import BaseDatabaseWrapper
 
-    real_conn = connections['default']
+    real_conn = connections["default"]
     real_cursor_func = BaseDatabaseWrapper.cursor
 
     def mock_cursor_side_effect(*args, **kwargs):
         cursor = real_cursor_func(real_conn, *args, **kwargs)
         real_execute = cursor.execute
+
         def mock_execute(sql, params=None):
             if sql == "SELECT 1":
                 raise Exception("Database is down")
             return real_execute(sql, params)
+
         cursor.execute = mock_execute
         return cursor
 
     mock_cursor.side_effect = mock_cursor_side_effect
-    
+
     mock_get.return_value = "ok"
     mock_exists.return_value = True
 

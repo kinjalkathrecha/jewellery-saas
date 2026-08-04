@@ -8,4 +8,4 @@ def test_correlation_id_middleware(client):
     response = client.get(url)
     assert response.status_code == 200
     assert "X-Correlation-ID" in response
-    assert len(response["X-Correlation-ID"]) > 10 # UUID length check
+    assert len(response["X-Correlation-ID"]) > 10  # UUID length check

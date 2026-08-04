@@ -55,6 +55,7 @@ class Shop(models.Model):
             self.trial_ends_at = timezone.now() + timedelta(days=7)
         super().save(*args, **kwargs)
         from core.services import cache_service
+
         cache_service.invalidate_subscription(self.id)
         cache_service.invalidate_dashboard(self.id)
 
@@ -62,16 +63,19 @@ class Shop(models.Model):
         shop_id = self.id
         super().delete(*args, **kwargs)
         from core.services import cache_service
+
         cache_service.invalidate_subscription(shop_id)
         cache_service.invalidate_dashboard(shop_id)
 
     def get_subscription_status(self):
         from core.services import cache_service
+
         cached_status = cache_service.get_subscription_status(self.id)
         if cached_status is not None:
             return cached_status
 
         from django.conf import settings
+
         grace_days = getattr(settings, "SUBSCRIPTION_GRACE_DAYS", 3)
         now = timezone.now()
 
@@ -116,7 +120,13 @@ class Shop(models.Model):
                     if is_trial
                     else f"Subscription expires in {hours_left} hours."
                 )
-            status_data = {"active": True, "status": sub.status, "message": msg, "days_left": days_left, "is_locked": False}
+            status_data = {
+                "active": True,
+                "status": sub.status,
+                "message": msg,
+                "days_left": days_left,
+                "is_locked": False,
+            }
         elif now < grace_ends_at:
             delta = grace_ends_at - now
             days_left = max(0, delta.days)
@@ -145,7 +155,6 @@ class Shop(models.Model):
 
         cache_service.set_subscription_status(self.id, status_data)
         return status_data
-
 
     def __str__(self):
         return self.name
@@ -195,14 +204,15 @@ class Subscription(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         from core.services import cache_service
+
         cache_service.invalidate_subscription(self.shop.id)
 
     def delete(self, *args, **kwargs):
         shop_id = self.shop.id
         super().delete(*args, **kwargs)
         from core.services import cache_service
-        cache_service.invalidate_subscription(shop_id)
 
+        cache_service.invalidate_subscription(shop_id)
 
 
 class Payment(models.Model):

@@ -6,15 +6,17 @@ from django.http import HttpResponse, JsonResponse
 
 logger = logging.getLogger(__name__)
 
+
 def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0].strip()
+        ip = x_forwarded_for.split(",")[0].strip()
     else:
-        ip = request.META.get('REMOTE_ADDR', '')
+        ip = request.META.get("REMOTE_ADDR", "")
     return ip
 
-def redis_rate_limit(key_prefix, limit, period, limit_by='ip'):
+
+def redis_rate_limit(key_prefix, limit, period, limit_by="ip"):
     """
     Custom decorator to enforce rate limits via Redis (or fallback cache backend).
 
@@ -24,11 +26,12 @@ def redis_rate_limit(key_prefix, limit, period, limit_by='ip'):
     - period: The time window in seconds (e.g. 60 for minutes, 3600 for hours)
     - limit_by: 'ip' (rate limit by client IP) or 'shop' (rate limit by shop ID)
     """
+
     def decorator(view_func):
         @functools.wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
-            if limit_by == 'shop':
-                identifier = str(request.shop.id) if hasattr(request, 'shop') and request.shop else 'anonymous'
+            if limit_by == "shop":
+                identifier = str(request.shop.id) if hasattr(request, "shop") and request.shop else "anonymous"
             else:
                 identifier = get_client_ip(request)
 
@@ -56,22 +59,21 @@ def redis_rate_limit(key_prefix, limit, period, limit_by='ip'):
                         f"Hits: {current_hits}/{limit} in {period}s."
                     )
                     # If this is an API request (starts with /api/ or has JSON accept headers), return JSON
-                    if request.path.startswith('/api/') or 'application/json' in request.META.get('HTTP_ACCEPT', ''):
-                        return JsonResponse(
-                            {"error": "Too many requests. Please try again later."},
-                            status=429
-                        )
+                    if request.path.startswith("/api/") or "application/json" in request.META.get("HTTP_ACCEPT", ""):
+                        return JsonResponse({"error": "Too many requests. Please try again later."}, status=429)
                     else:
                         response = HttpResponse(
                             "<h1>429 Too Many Requests</h1><p>You have exceeded your rate limit. Please try again later.</p>",
-                            status=429
+                            status=429,
                         )
-                        response['Retry-After'] = str(period)
+                        response["Retry-After"] = str(period)
                         return response
             except Exception as e:
                 # Fail open to prevent redis connection failure from blocking user access
                 logger.error(f"[Rate Limit Error] Failed to enforce rate limit: {e}")
 
             return view_func(request, *args, **kwargs)
+
         return _wrapped_view
+
     return decorator

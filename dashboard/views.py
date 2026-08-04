@@ -23,6 +23,7 @@ def invalidate_dashboard_cache(sender, instance, **kwargs):
     if shop_id:
         cache_service.invalidate_dashboard(shop_id)
 
+
 @login_required
 def home(request):
     shop = request.shop
@@ -136,7 +137,6 @@ def home(request):
     }
     cache_service.set_dashboard_stats(shop.id, context)
     return render(request, "dashboard/home.html", context)
-
 
 
 from django.contrib import messages

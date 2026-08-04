@@ -12,6 +12,7 @@ class JSONFormatter(logging.Formatter):
     Automatically captures the active request's correlation ID from thread-local storage,
     exception stack traces, and any extra dictionary fields.
     """
+
     def format(self, record):
         log_data = {
             "timestamp": timezone.now().isoformat(),
@@ -28,10 +29,28 @@ class JSONFormatter(logging.Formatter):
         # Merge in any extra attributes provided in logger calls (e.g. extra={"shop_id": X, "latency": Y})
         # Ignoring standard Python LogRecord parameters
         standard_attributes = {
-            "args", "asctime", "created", "exc_info", "exc_text", "filename",
-            "funcName", "levelname", "levelno", "lineno", "module",
-            "msecs", "msg", "name", "pathname", "process", "processName",
-            "relativeCreated", "stack_info", "thread", "threadName", "request"
+            "args",
+            "asctime",
+            "created",
+            "exc_info",
+            "exc_text",
+            "filename",
+            "funcName",
+            "levelname",
+            "levelno",
+            "lineno",
+            "module",
+            "msecs",
+            "msg",
+            "name",
+            "pathname",
+            "process",
+            "processName",
+            "relativeCreated",
+            "stack_info",
+            "thread",
+            "threadName",
+            "request",
         }
 
         for key, value in record.__dict__.items():

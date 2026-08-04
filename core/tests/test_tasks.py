@@ -13,7 +13,7 @@ from tests.factories.subscriptions import SubscriptionFactory, SubscriptionPlanF
 @pytest.mark.django_db
 class TestCeleryTasks:
     def test_send_invoice_email_task_missing_invoice(self):
-        with patch('logging.Logger.error') as mock_log:
+        with patch("logging.Logger.error") as mock_log:
             send_invoice_email_task(99999)
             # Verify logger log error message
             mock_log.assert_any_call("Invoice 99999 not found. Cannot send email.")
@@ -31,7 +31,7 @@ class TestCeleryTasks:
             current_period_end=timezone.now() + timedelta(days=30),
             max_products=1000,
             max_users=3,
-            duration_days=30
+            duration_days=30,
         )
         shop.active_subscription = sub
         shop.save()

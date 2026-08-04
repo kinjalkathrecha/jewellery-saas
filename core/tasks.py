@@ -11,6 +11,7 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
+
 def upload_to_cloud_storage(filepath):
     """
     Extensible interface for uploading backups to external cloud storage.
@@ -19,6 +20,7 @@ def upload_to_cloud_storage(filepath):
     logger.info(f"[Backup Storage] Ready to upload {filepath} to cloud storage (GCS/S3 placeholder).")
     # TODO: Add S3/GCS upload client logic here
     pass
+
 
 @shared_task(
     bind=True,
@@ -32,6 +34,7 @@ def send_invoice_email_task(self, invoice_id):
     Autoretry on network/SMTP failure.
     """
     from billing.models import Invoice
+
     try:
         invoice = Invoice.objects.select_related("customer", "shop").get(id=invoice_id)
     except Invoice.DoesNotExist:
@@ -64,6 +67,7 @@ def send_invoice_email_task(self, invoice_id):
     )
     logger.info(f"Successfully sent invoice email for Invoice #{invoice.invoice_number} to {customer_email}")
 
+
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),
@@ -76,6 +80,7 @@ def check_subscriptions_task(self):
     and sends a reminder notification email.
     """
     from core.models import Shop
+
     now = timezone.now()
     cutoff = now + timedelta(days=3)
 
@@ -113,6 +118,7 @@ def check_subscriptions_task(self):
                 logger.error(f"Failed to send expiry warning to {shop.email}: {e}")
 
     logger.info(f"Subscription checker finished. Sent {email_count} expiry warning emails.")
+
 
 @shared_task(
     bind=True,
@@ -152,14 +158,7 @@ def backup_database_task(self):
     env = os.environ.copy()
     env["PGPASSWORD"] = db_password
 
-    cmd = [
-        "pg_dump",
-        "-h", db_host,
-        "-p", str(db_port),
-        "-U", db_user,
-        "-d", db_name,
-        "-f", sql_filepath
-    ]
+    cmd = ["pg_dump", "-h", db_host, "-p", str(db_port), "-U", db_user, "-d", db_name, "-f", sql_filepath]
 
     try:
         # Run pg_dump command
@@ -185,6 +184,7 @@ def backup_database_task(self):
             os.remove(sql_filepath)
         raise
 
+
 @shared_task
 def send_sms_notification_task(to_number, message):
     """
@@ -193,6 +193,7 @@ def send_sms_notification_task(to_number, message):
     """
     logger.info(f"[SMS Notification Stub] Sending to {to_number}: {message}")
 
+
 @shared_task
 def send_whatsapp_notification_task(to_number, message):
     """
@@ -200,6 +201,7 @@ def send_whatsapp_notification_task(to_number, message):
     Can be wired to actual WhatsApp Business API later.
     """
     logger.info(f"[WhatsApp Notification Stub] Sending to {to_number}: {message}")
+
 
 @shared_task
 def handle_failed_task(task_name, task_id, args, kwargs, exception_msg):
@@ -210,4 +212,3 @@ def handle_failed_task(task_name, task_id, args, kwargs, exception_msg):
         f"[DLQ Audit] Task '{task_name}' [{task_id}] permanently failed!\n"
         f"Args: {args}\nKwargs: {kwargs}\nException: {exception_msg}"
     )
-

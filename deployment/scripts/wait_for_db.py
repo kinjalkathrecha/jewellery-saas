@@ -12,32 +12,23 @@ def check_db():
 
     try:
         import psycopg
-        conn = psycopg.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port,
-            connect_timeout=3
-        )
+
+        conn = psycopg.connect(dbname=dbname, user=user, password=password, host=host, port=port, connect_timeout=3)
         conn.close()
         return True
     except ImportError:
         try:
             import psycopg2
+
             conn = psycopg2.connect(
-                dbname=dbname,
-                user=user,
-                password=password,
-                host=host,
-                port=port,
-                connect_timeout=3
+                dbname=dbname, user=user, password=password, host=host, port=port, connect_timeout=3
             )
             conn.close()
             return True
         except ImportError:
             # Fallback to pure socket check if drivers are not loaded in execution path
             import socket
+
             try:
                 s = socket.create_connection((host, int(port)), timeout=3)
                 s.close()
@@ -50,6 +41,7 @@ def check_db():
     except Exception as e:
         print(f"Database connection attempt failed: {e}")
         return False
+
 
 def main():
     print("Checking database availability...")
@@ -64,6 +56,7 @@ def main():
             retries -= 1
     print("Database connection timed out. Exiting.")
     sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
