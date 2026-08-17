@@ -1,0 +1,337 @@
+{% extends "marketing/components/base_marketing.html" %}
+
+{% block title %}Software Features Built For Jewellers | {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .features-hero {
+        padding: 4rem 0 3rem 0;
+        text-align: center;
+    }
+    
+    .features-hero h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+    
+    .features-hero p {
+        color: var(--text-muted);
+        font-size: 1.15rem;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .features-detail-section {
+        padding: 5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .features-detail-section:last-child {
+        border-bottom: none;
+    }
+
+    .feature-row {
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    @media(min-width: 992px) {
+        .feature-row {
+            flex-direction: row;
+        }
+        .feature-row.reverse {
+            flex-direction: row-reverse;
+        }
+        .feature-col-text {
+            flex: 1;
+        }
+        .feature-col-visual {
+            flex: 1;
+        }
+    }
+
+    .feature-tag {
+        color: var(--primary-color);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .feature-detail-title {
+        font-size: 1.85rem;
+        font-weight: 800;
+        margin-bottom: 1.25rem;
+        line-height: 1.2;
+    }
+
+    .feature-detail-desc {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        font-size: 1rem;
+    }
+
+    .feature-bullet-list {
+        list-style: none;
+    }
+
+    .feature-bullet-list li {
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.95rem;
+    }
+
+    .feature-bullet-list li i {
+        color: var(--primary-color);
+        margin-top: 4px;
+    }
+
+    /* Live gold rate widget styling */
+    .rate-widget-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        text-align: left;
+    }
+
+    .rate-widget-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .rate-widget-title {
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .rate-widget-title i { color: var(--primary-color); }
+    .rate-widget-time { font-size: 0.75rem; color: var(--text-muted); }
+
+    .rate-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+    }
+
+    .rate-row:last-child {
+        border-bottom: none;
+    }
+
+    .rate-karat { font-weight: 600; }
+    .rate-price { font-weight: 700; color: var(--text-light); }
+    .rate-price.up { color: #48bb78; }
+
+    /* Mock GST receipt widget */
+    .receipt-mock {
+        background-color: #f7fafc;
+        color: #2d3748;
+        border-radius: 8px;
+        padding: 2rem;
+        font-family: 'Courier New', Courier, monospace;
+        box-shadow: var(--shadow-md);
+        border: 1px solid #e2e8f0;
+    }
+
+    .receipt-line {
+        border-bottom: 1px dashed #cbd5e0;
+        margin: 0.75rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Header Hero -->
+    <section class="features-hero">
+        <span class="feature-tag">Engineered for Jewelers</span>
+        <h1>Core Capabilities Built Into Our Platform</h1>
+        <p>Aureate provides an all-in-one suite to eliminate manual books, track inventory margins, run quick billing, and manage repairs.</p>
+    </section>
+
+    <!-- Section 1: Gold Rate & Karat Management -->
+    <section class="features-detail-section">
+        <div class="feature-row">
+            <div class="feature-col-text">
+                <span class="feature-tag">Metal Rate Tracking</span>
+                <h2 class="feature-detail-title">Dynamic Gold & Silver Rate Management</h2>
+                <p class="feature-detail-desc">
+                    Stop manual math on scratchpads. Our system updates rates instantly, calculating inventory valuations and POS checkout prices on active weight values automatically.
+                </p>
+                <ul class="feature-bullet-list">
+                    <li><i class='bx bx-check'></i> <strong>Karat Customization:</strong> Supports 24K, 22K, 18K, 14K, and custom purity settings.</li>
+                    <li><i class='bx bx-check'></i> <strong>Real-time Update Hooks:</strong> Set the rate once to update the prices of all tag items in the shop instantly.</li>
+                    <li><i class='bx bx-check'></i> <strong>Margin Safeguards:</strong> Prevent sales if pricing falls below raw material costs.</li>
+                </ul>
+            </div>
+            <div class="feature-col-visual">
+                <div class="rate-widget-card">
+                    <div class="rate-widget-header">
+                        <span class="rate-widget-title"><i class='bx bxs-line-chart'></i> Live Metal Rates</span>
+                        <span class="rate-widget-time">Updated: Just Now</span>
+                    </div>
+                    <div class="rate-row">
+                        <span class="rate-karat">Gold 24K (Fine Gold)</span>
+                        <span class="rate-price up">₹78,450 / 10g</span>
+                    </div>
+                    <div class="rate-row">
+                        <span class="rate-karat">Gold 22K (Standard Jewelry)</span>
+                        <span class="rate-price">₹71,910 / 10g</span>
+                    </div>
+                    <div class="rate-row">
+                        <span class="rate-karat">Gold 18K (Diamond Settings)</span>
+                        <span class="rate-price">₹58,840 / 10g</span>
+                    </div>
+                    <div class="rate-row">
+                        <span class="rate-karat">Silver 999 (Fine Silver)</span>
+                        <span class="rate-price">₹92,500 / 1kg</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Making Charges & Wastage -->
+    <section class="features-detail-section">
+        <div class="feature-row reverse">
+            <div class="feature-col-text">
+                <span class="feature-tag">Labor Cost Controls</span>
+                <h2 class="feature-detail-title">Making Charges & Wastage Calculation</h2>
+                <p class="feature-detail-desc">
+                    Handle complex labor and wastage fees effortlessly. Configure variable options depending on jewelry items and craftsmanship complexity.
+                </p>
+                <ul class="feature-bullet-list">
+                    <li><i class='bx bx-check'></i> <strong>Flat vs Percentage:</strong> Charge labor by fixed gram weight (e.g. ₹450/gram) or total weight percentage.</li>
+                    <li><i class='bx bx-check'></i> <strong>Wastage Allowances:</strong> Log raw wastage (in %) to automatically compute final product costs.</li>
+                    <li><i class='bx bx-check'></i> <strong>Stone Value Isolation:</strong> Track stones, pearls, and diamonds separately from raw gold weight.</li>
+                </ul>
+            </div>
+            <div class="feature-col-visual">
+                <div class="rate-widget-card">
+                    <div style="font-weight: 700; margin-bottom: 1rem;"><i class='bx bx-calculator' style="color: var(--primary-color);"></i> Making Charge Breakdown</div>
+                    <div class="rate-row">
+                        <span>Net Gold Weight</span>
+                        <span>18.50g</span>
+                    </div>
+                    <div class="rate-row">
+                        <span>Daily Gold Rate (22K)</span>
+                        <span>₹7,191/g</span>
+                    </div>
+                    <div class="rate-row">
+                        <span>Making Charges (₹450/g)</span>
+                        <span>₹8,325</span>
+                    </div>
+                    <div class="rate-row">
+                        <span>Wastage Allowance (1%)</span>
+                        <span>₹1,330</span>
+                    </div>
+                    <div class="rate-row" style="border-top: 1px solid rgba(255, 255, 255, 0.15); font-weight: 700; padding-top: 1rem;">
+                        <span>Final Bill Price</span>
+                        <span style="color: var(--primary-color);">₹1,42,688</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: POS Invoicing & GST -->
+    <section class="features-detail-section">
+        <div class="feature-row">
+            <div class="feature-col-text">
+                <span class="feature-tag">Point of Sale (POS)</span>
+                <h2 class="feature-detail-title">Fast POS Billing & GST-Compliant Invoicing</h2>
+                <p class="feature-detail-desc">
+                    Produce professional receipts in seconds. Maintain compliance with automated tax configurations.
+                </p>
+                <ul class="feature-bullet-list">
+                    <li><i class='bx bx-check'></i> <strong>GST Invoice Print:</strong> Formatted print-ready receipts detailing SGST, CGST, and HSN codes.</li>
+                    <li><i class='bx bx-check'></i> <strong>Old Gold Exchange Ledger:</strong> Deduct value of exchanged gold weight directly on the checkout invoice.</li>
+                    <li><i class='bx bx-check'></i> <strong>Customer Profiles:</strong> Check previous buybacks, outstanding balance ledgers, and purchase history.</li>
+                </ul>
+            </div>
+            <div class="feature-col-visual">
+                <div class="receipt-mock">
+                    <div style="text-align: center; font-weight: bold; margin-bottom: 0.5rem;">SHIV JEWELLERS, RAJKOT</div>
+                    <div style="text-align: center; font-size: 0.8rem; margin-bottom: 1rem;">Tax Invoice (GST-Ready)</div>
+                    <div class="receipt-line"></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                        <span>1x Gold Ring (22K)</span>
+                        <span>₹45,500</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #718096; margin-left: 10px;">Wt: 6.20g, MC: ₹300/g</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 0.5rem;">
+                        <span>(-) Old Gold Exchange</span>
+                        <span>-₹15,000</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #718096; margin-left: 10px;">Wt: 2.50g @ ₹6,000/g</div>
+                    <div class="receipt-line"></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold;">
+                        <span>Gross Bill</span>
+                        <span>₹30,500</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                        <span>CGST 1.5%</span>
+                        <span>₹457.50</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                        <span>SGST 1.5%</span>
+                        <span>₹457.50</span>
+                    </div>
+                    <div class="receipt-line"></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: bold; color: #1a202c;">
+                        <span>NET PAYABLE</span>
+                        <span>₹31,415</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Multi-Tenant Branch Workspace -->
+    <section class="features-detail-section">
+        <div class="feature-row reverse">
+            <div class="feature-col-text">
+                <span class="feature-tag">SaaS Architecture</span>
+                <h2 class="feature-detail-title">Secure Multi-Tenant Workspaces & Multi-Store Control</h2>
+                <p class="feature-detail-desc">
+                    Your data is fully protected. Our secure multi-tenant structure guarantees isolated environments for every retailer.
+                </p>
+                <ul class="feature-bullet-list">
+                    <li><i class='bx bx-check'></i> <strong>Complete Data Isolation:</strong> Every shop gets an independent workspace.</li>
+                    <li><i class='bx bx-check'></i> <strong>Staff Roles & Rules:</strong> Limit salesman permissions (e.g. read stock, disable discount editing).</li>
+                    <li><i class='bx bx-check'></i> <strong>Multi-Store Dashboard:</strong> Monitor sales and inventories across various branch stores from one login.</li>
+                </ul>
+            </div>
+            <div class="feature-col-visual">
+                <div class="rate-widget-card">
+                    <div style="font-weight: 700; margin-bottom: 1rem;"><i class='bx bxs-shield-alt-2' style="color: var(--primary-color);"></i> Workspace Isolation Config</div>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 0.75rem; background: rgba(72,187,120,0.1); border-radius: 6px; border: 1px solid rgba(72,187,120,0.2); font-size: 0.85rem; margin-bottom: 1rem;">
+                        <i class='bx bx-check-double' style="color: #48bb78; font-size: 1.2rem;"></i> Tenant ID Isolation Active
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+                        Row-level multi-tenant policies ensure shop data is never shared. Sales data, customer registers, and invoice histories are dynamically isolated at the database request scope.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

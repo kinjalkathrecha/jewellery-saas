@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { padding: 20px; border: 1px solid #eee; border-radius: 5px; max-width: 600px; margin: 0 auto; }
+        .header { font-size: 18px; font-weight: bold; border-bottom: 2px solid #d4af37; padding-bottom: 10px; margin-bottom: 20px; color: #d4af37; }
+        .field { margin-bottom: 10px; }
+        .label { font-weight: bold; color: #555; }
+        .message-box { background-color: #f9f9f9; padding: 15px; border-radius: 4px; border-left: 3px solid #d4af37; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">New CRM Lead Captured - {{ site_name }}</div>
+        <div class="field"><span class="label">Lead Type:</span> {{ lead.get_lead_type_display }}</div>
+        <div class="field"><span class="label">Name:</span> {{ lead.name }}</div>
+        <div class="field"><span class="label">Email:</span> {{ lead.email }}</div>
+        <div class="field"><span class="label">Phone:</span> {{ lead.phone|default:"Not provided" }}</div>
+        <div class="field"><span class="label">Shop Name:</span> {{ lead.shop_name|default:"Not provided" }}</div>
+        <div class="field"><span class="label">Acquisition Source:</span> {{ lead.source }}</div>
+        {% if lead.utm_source or lead.utm_medium or lead.utm_campaign %}
+        <div class="field"><span class="label">UTM Details:</span> source={{ lead.utm_source|default:"none" }}, medium={{ lead.utm_medium|default:"none" }}, campaign={{ lead.utm_campaign|default:"none" }}</div>
+        {% endif %}
+        {% if lead.message %}
+        <div class="field"><span class="label">Customer Message:</span></div>
+        <div class="message-box">{{ lead.message|linebreaksbr }}</div>
+        {% endif %}
+    </div>
+</body>
+</html>

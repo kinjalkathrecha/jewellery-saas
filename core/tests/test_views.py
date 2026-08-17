@@ -10,7 +10,7 @@ from django.urls import reverse
 @patch("django.core.files.storage.default_storage.save")
 @patch("django.core.files.storage.default_storage.exists")
 @patch("django.core.files.storage.default_storage.delete")
-@patch("core.views.current_app.control.inspect")
+@patch("core.views.marketing.current_app.control.inspect")
 def test_health_check_success(mock_celery_inspect, mock_delete, mock_exists, mock_save, mock_set, mock_get, client):
     """
     Test that when all backends (DB, Redis, Celery, Storage) are functional,
@@ -42,13 +42,13 @@ def test_health_check_success(mock_celery_inspect, mock_delete, mock_exists, moc
 
 
 @pytest.mark.django_db
-@patch("core.views.connection.cursor")
+@patch("core.views.marketing.connection.cursor")
 @patch("django.core.cache.cache.get")
 @patch("django.core.cache.cache.set")
 @patch("django.core.files.storage.default_storage.save")
 @patch("django.core.files.storage.default_storage.exists")
 @patch("django.core.files.storage.default_storage.delete")
-@patch("core.views.current_app.control.inspect")
+@patch("core.views.marketing.current_app.control.inspect")
 def test_health_check_failure(
     mock_celery_inspect, mock_delete, mock_exists, mock_save, mock_set, mock_get, mock_cursor, client
 ):

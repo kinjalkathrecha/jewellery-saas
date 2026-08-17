@@ -1,0 +1,131 @@
+{% extends "marketing/components/base_marketing.html" %}
+
+{% block title %}Jewelry Retail Business Resources & Guides | {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .resources-hero {
+        padding: 5rem 0 3rem 0;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .resources-hero h1 {
+        font-size: 2.75rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+
+    .resources-hero p {
+        color: var(--text-muted);
+        font-size: 1.25rem;
+    }
+
+    .blog-card {
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .blog-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(212, 175, 55, 0.2);
+    }
+
+    .blog-content {
+        padding: 2rem;
+        flex: 1;
+    }
+
+    .blog-tag {
+        color: var(--primary-color);
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .blog-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.3;
+    }
+
+    .blog-excerpt {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .blog-link {
+        color: var(--text-light);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: var(--transition);
+    }
+
+    .blog-link:hover {
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Hero Header -->
+    <section class="resources-hero">
+        <span class="feature-tag" style="display: inline-block; margin-bottom: 1rem;">Learning Center</span>
+        <h1>Guides & Insights for Modern Jewellers</h1>
+        <p>Expert articles to help you optimize inventory management, GST compliance, and billing systems in your showroom.</p>
+    </section>
+
+    <!-- Resources grid -->
+    <div class="grid grid-3" style="margin-top: 4rem;">
+        
+        <!-- Post 1 -->
+        <article class="blog-card">
+            <div class="blog-content">
+                <span class="blog-tag">Inventory Management</span>
+                <h3 class="blog-title">How to Digitally Track Raw Gold & Diamond Weights</h3>
+                <p class="blog-excerpt">Learn best practices for cataloging net weights, fine weights, and stone charges without manual record chaos.</p>
+                <a href="#" class="blog-link">Read Guide <i class='bx bx-right-arrow-alt'></i></a>
+            </div>
+        </article>
+
+        <!-- Post 2 -->
+        <article class="blog-card">
+            <div class="blog-content">
+                <span class="blog-tag">GST Compliance</span>
+                <h3 class="blog-title">A Guide to GST Billing & Invoicing for Jewellers</h3>
+                <p class="blog-excerpt">Unpack HSN code mappings, tax rate applications, and SGST/CGST rules for domestic jewelry sales.</p>
+                <a href="#" class="blog-link">Read Guide <i class='bx bx-right-arrow-alt'></i></a>
+            </div>
+        </article>
+
+        <!-- Post 3 -->
+        <article class="blog-card">
+            <div class="blog-content">
+                <span class="blog-tag">Customer Loyalty</span>
+                <h3 class="blog-title">Managing Customer Gold Exchange Balances</h3>
+                <p class="blog-excerpt">How to record old gold trade-ins, track buyback rates, and maintain clean customer accounts ledger systems.</p>
+                <a href="#" class="blog-link">Read Guide <i class='bx bx-right-arrow-alt'></i></a>
+            </div>
+        </article>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -2,8 +2,10 @@ services:
   db:
     image: postgres:15-alpine
     container_name: jewellery_saas_db
+    env_file:
+      - ../../.env
     environment:
-      POSTGRES_DB: ${DB_NAME:-jewellery_saas_test}
+      POSTGRES_DB: ${DB_NAME:-jewellery_saas_db}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
     volumes:
@@ -48,6 +50,14 @@ services:
       - backup_volume:/app/backups
     env_file:
       - ../../.env
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-jewellery_saas_db}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
     ports:
       - "8000:8000"
     depends_on:
@@ -74,6 +84,14 @@ services:
       - backup_volume:/app/backups
     env_file:
       - ../../.env
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-jewellery_saas_db}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
     depends_on:
       db:
         condition: service_healthy
@@ -97,6 +115,14 @@ services:
       - backup_volume:/app/backups
     env_file:
       - ../../.env
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-jewellery_saas_db}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
     depends_on:
       db:
         condition: service_healthy
@@ -119,6 +145,14 @@ services:
       - "5555:5555"
     env_file:
       - ../../.env
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-jewellery_saas_db}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
     depends_on:
       redis:
         condition: service_healthy

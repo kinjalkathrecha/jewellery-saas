@@ -38,7 +38,7 @@
         
         <ul class="nav flex-column mt-4">
             <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.app_name == 'dashboard' and 'reports' not in request.path and 'settings' not in request.path %}active{% endif %}" href="/">
+                <a class="nav-link {% if request.resolver_match.app_name == 'dashboard' and 'reports' not in request.path and 'settings' not in request.path %}active{% endif %}" href="{% url 'dashboard:home' %}">
                     <i class='bx bxs-dashboard'></i> Dashboard
                 </a>
             </li>

@@ -249,3 +249,35 @@ class SubscriptionEvent(models.Model):
 
     def __str__(self):
         return f"{self.event_type} - {self.shop.name} at {self.created_at}"
+
+
+class Lead(models.Model):
+    LEAD_TYPES = [
+        ("DEMO", "Demo Request"),
+        ("CONTACT", "General Contact"),
+        ("NEWSLETTER", "Newsletter Signup"),
+    ]
+    STATUS_CHOICES = [
+        ("NEW", "New"),
+        ("CONTACTED", "Contacted"),
+        ("DEMO", "Demo Scheduled"),
+        ("CONVERTED", "Converted"),
+        ("LOST", "Lost"),
+    ]
+    name = models.CharField(max_length=255)
+    shop_name = models.CharField(max_length=255, blank=True)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True)
+    message = models.TextField(blank=True)
+    lead_type = models.CharField(max_length=20, choices=LEAD_TYPES, default="CONTACT")
+    source = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="NEW")
+    notes = models.TextField(blank=True)
+    utm_source = models.CharField(max_length=100, blank=True)
+    utm_medium = models.CharField(max_length=100, blank=True)
+    utm_campaign = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.shop_name or self.email} ({self.get_lead_type_display()})"

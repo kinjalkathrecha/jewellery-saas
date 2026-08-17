@@ -72,6 +72,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core.context_processors.site_settings",
             ],
         },
     },
@@ -83,9 +84,9 @@ WSGI_APPLICATION = "jewellery_saas.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": env.str("DB_ENGINE", default="django.db.backends.postgresql"),
-        "NAME": env.str("DB_NAME"),
-        "USER": env.str("DB_USER"),
-        "PASSWORD": env.str("DB_PASSWORD"),
+        "NAME": env.str("DB_NAME", default="jewellery_saas"),
+        "USER": env.str("DB_USER", default="postgres"),
+        "PASSWORD": env.str("DB_PASSWORD", default="password"),
         "HOST": env.str("DB_HOST", default="localhost"),
         "PORT": env.str("DB_PORT", default="5432"),
         "CONN_MAX_AGE": 600,  # Keep database connections open for 10 minutes
@@ -245,3 +246,8 @@ DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="no-reply@aureate.com
 
 # Application version configuration
 APP_VERSION = env.str("APP_VERSION", default="0.96")
+
+# SaaS site branding settings
+SITE_NAME = env.str("SITE_NAME", default="Aureate")
+SITE_TAGLINE = env.str("SITE_TAGLINE", default="Operating System for Modern Jewelry Retailers")
+SITE_DESCRIPTION = env.str("SITE_DESCRIPTION", default="Jewelry inventory, billing and repair management software")

@@ -1,0 +1,469 @@
+{% extends "marketing/components/base_marketing.html" %}
+
+{% block title %}Simple, Transparent Pricing Plans | {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pricing-hero {
+        padding: 4rem 0 2rem 0;
+        text-align: center;
+    }
+
+    .pricing-hero h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+
+    .pricing-hero p {
+        color: var(--text-muted);
+        font-size: 1.15rem;
+        max-width: 600px;
+        margin: 0 auto 2rem auto;
+    }
+
+    .trial-badge {
+        display: inline-block;
+        background-color: rgba(72, 187, 120, 0.1);
+        border: 1px solid rgba(72, 187, 120, 0.25);
+        color: #48bb78;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Billing cycle toggle switch */
+    .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 4rem;
+    }
+
+    .toggle-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+
+    .toggle-label.active {
+        color: var(--text-light);
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #2d3748;
+        transition: .4s;
+        border-radius: 34px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 3px;
+        bottom: 3px;
+        background-color: var(--primary-color);
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--bg-card);
+        border-color: var(--primary-color);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .discount-tag {
+        background-color: var(--primary-color);
+        color: #0f1115;
+        font-weight: 800;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-left: 5px;
+    }
+
+    /* Pricing Cards Layout */
+    .pricing-card {
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 16px;
+        padding: 3rem 2.25rem;
+        position: relative;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pricing-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(212, 175, 55, 0.2);
+    }
+
+    .pricing-card.popular {
+        border-color: var(--primary-color);
+        box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.15);
+    }
+
+    .popular-ribbon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: #0f1115;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+    }
+
+    .plan-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .plan-desc {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+        min-height: 40px;
+    }
+
+    .plan-price-wrapper {
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: baseline;
+    }
+
+    .plan-currency {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+    }
+
+    .plan-price {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--text-light);
+        line-height: 1;
+    }
+
+    .plan-period {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-left: 0.25rem;
+    }
+
+    .plan-features {
+        list-style: none;
+        margin-bottom: 3rem;
+        flex: 1;
+    }
+
+    .plan-features li {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.95rem;
+        color: var(--text-light);
+    }
+
+    .plan-features li i {
+        color: var(--primary-color);
+        font-size: 1.15rem;
+    }
+
+    .plan-features li.disabled {
+        color: var(--text-muted);
+        text-decoration: line-through;
+        opacity: 0.5;
+    }
+
+    .plan-features li.disabled i {
+        color: var(--text-muted);
+    }
+
+    /* Comparison Table Section */
+    .comparison-section {
+        padding: 6rem 0;
+    }
+
+    .comparison-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background-color: var(--bg-card);
+    }
+
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+    }
+
+    .comparison-table th, .comparison-table td {
+        padding: 1.25rem 1.5rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .comparison-table th:first-child, .comparison-table td:first-child {
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .comparison-table th {
+        background-color: rgba(255, 255, 255, 0.01);
+        color: var(--text-light);
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .comparison-table td {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+    }
+
+    .comparison-table td i {
+        font-size: 1.25rem;
+    }
+
+    .comparison-table td i.bx-check {
+        color: var(--primary-color);
+    }
+
+    .comparison-table td i.bx-x {
+        color: var(--text-muted);
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Pricing Hero -->
+    <section class="pricing-hero">
+        <span class="trial-badge"><i class='bx bx-party'></i> 14 Days Free Trial &mdash; No Credit Card Required</span>
+        <h1>Predictable, Transparent Pricing Plans</h1>
+        <p>Choose the tier designed for your jewelry retail model. Switch or cancel your subscription at any time.</p>
+        
+        <!-- Toggle Switch -->
+        <div class="toggle-container">
+            <span class="toggle-label active" id="monthlyLabel">Monthly billing</span>
+            <label class="switch">
+                <input type="checkbox" id="pricingToggle">
+                <span class="slider"></span>
+            </label>
+            <span class="toggle-label" id="yearlyLabel">Yearly billing <span class="discount-tag">Save 17%</span></span>
+        </div>
+    </section>
+
+    <!-- Pricing Grid -->
+    <div class="grid grid-3">
+        <!-- Starter Plan -->
+        <div class="pricing-card">
+            <h2 class="plan-name">Starter Plan</h2>
+            <p class="plan-desc">Perfect for boutique jewelry shops and single-owner retailers.</p>
+            <div class="plan-price-wrapper">
+                <span class="plan-currency">₹</span>
+                <span class="plan-price" id="starterPrice">999</span>
+                <span class="plan-period" id="starterPeriod">/month</span>
+            </div>
+            
+            <ul class="plan-features">
+                <li><i class='bx bx-check-circle'></i> Complete Gold/Silver Inventory</li>
+                <li><i class='bx bx-check-circle'></i> GST Invoicing & POS Sales</li>
+                <li><i class='bx bx-check-circle'></i> Customer History Registry</li>
+                <li><i class='bx bx-check-circle'></i> Standard Business Reports</li>
+                <li class="disabled"><i class='bx bx-x-circle'></i> Repair Order tracking</li>
+                <li class="disabled"><i class='bx bx-x-circle'></i> Multi-Branch Store Dashboard</li>
+                <li class="disabled"><i class='bx bx-x-circle'></i> Multi-User Staff Access</li>
+            </ul>
+            
+            <a href="{% url 'demo_page' %}?plan=starter" class="btn btn-secondary">Start Free Trial</a>
+        </div>
+
+        <!-- Professional Plan -->
+        <div class="pricing-card popular">
+            <span class="popular-ribbon">Most Popular</span>
+            <h2 class="plan-name">Professional Plan</h2>
+            <p class="plan-desc">For growing retailers and multi-staff jewelry showrooms.</p>
+            <div class="plan-price-wrapper">
+                <span class="plan-currency">₹</span>
+                <span class="plan-price" id="proPrice">2,499</span>
+                <span class="plan-period" id="proPeriod">/month</span>
+            </div>
+            
+            <ul class="plan-features">
+                <li><i class='bx bx-check-circle'></i> <strong>Everything in Starter Plan</strong></li>
+                <li><i class='bx bx-check-circle'></i> Repair job cards tracking</li>
+                <li><i class='bx bx-check-circle'></i> Multi-User Staff access control</li>
+                <li><i class='bx bx-check-circle'></i> Advanced Profit/Sales Reports</li>
+                <li><i class='bx bx-check-circle'></i> Old Gold buybacks ledger</li>
+                <li class="disabled"><i class='bx bx-x-circle'></i> Multi-Branch Store Dashboard</li>
+                <li class="disabled"><i class='bx bx-x-circle'></i> API Access & Custom Syncs</li>
+            </ul>
+            
+            <a href="{% url 'demo_page' %}?plan=professional" class="btn btn-primary">Start Free Trial</a>
+        </div>
+
+        <!-- Enterprise Plan -->
+        <div class="pricing-card">
+            <h2 class="plan-name">Enterprise Plan</h2>
+            <p class="plan-desc">For jewelry chain showrooms with multiple locations and warehouses.</p>
+            <div class="plan-price-wrapper" style="margin-bottom: 2.75rem;">
+                <span class="plan-price" style="font-size: 2.5rem;">Custom</span>
+            </div>
+            
+            <ul class="plan-features">
+                <li><i class='bx bx-check-circle'></i> <strong>Everything in Professional Plan</strong></li>
+                <li><i class='bx bx-check-circle'></i> Multi-Branch Store Dashboard</li>
+                <li><i class='bx bx-check-circle'></i> Shared inventory allocations</li>
+                <li><i class='bx bx-check-circle'></i> Dedicated integration manager</li>
+                <li><i class='bx bx-check-circle'></i> Custom print templates</li>
+                <li><i class='bx bx-check-circle'></i> API Access & developer keys</li>
+                <li><i class='bx bx-check-circle'></i> SLA uptime guarantees</li>
+            </ul>
+            
+            <a href="{% url 'demo_page' %}?plan=enterprise" class="btn btn-secondary">Talk to Sales</a>
+        </div>
+    </div>
+
+    <!-- Plan Feature Matrix Comparison Table -->
+    <section class="comparison-section">
+        <div class="section-header">
+            <h2 class="section-title">Compare All Plan Features</h2>
+            <p class="section-subtitle">Deep dive detail specifications to select the exact roadmap for your shop format.</p>
+        </div>
+
+        <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Core Capabilities</th>
+                        <th>Starter</th>
+                        <th>Professional</th>
+                        <th>Enterprise</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Gold / Silver Weight Inventory</td>
+                        <td><i class='bx bx-check'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                    </tr>
+                    <tr>
+                        <td>GST POS Invoicing & Billing</td>
+                        <td><i class='bx bx-check'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                    </tr>
+                    <tr>
+                        <td>Live Metal Rate Recalculation</td>
+                        <td><i class='bx bx-check'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                    </tr>
+                    <tr>
+                        <td>Repairs tracking & job cards</td>
+                        <td><i class='bx bx-x'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                    </tr>
+                    <tr>
+                        <td>Multi-staff access control</td>
+                        <td><i class='bx bx-x'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                    </tr>
+                    <tr>
+                        <td>Multi-Branch dashboard</td>
+                        <td><i class='bx bx-x'></i></td>
+                        <td><i class='bx bx-x'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                    </tr>
+                    <tr>
+                        <td>Custom API & integrations</td>
+                        <td><i class='bx bx-x'></i></td>
+                        <td><i class='bx bx-x'></i></td>
+                        <td><i class='bx bx-check'></i></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const toggle = document.getElementById('pricingToggle');
+    const monthlyLabel = document.getElementById('monthlyLabel');
+    const yearlyLabel = document.getElementById('yearlyLabel');
+    
+    // Plan prices
+    const starterPrice = document.getElementById('starterPrice');
+    const proPrice = document.getElementById('proPrice');
+    
+    // Period suffixes
+    const starterPeriod = document.getElementById('starterPeriod');
+    const proPeriod = document.getElementById('proPeriod');
+
+    toggle.addEventListener('change', () => {
+        if(toggle.checked) {
+            // Yearly billing rates
+            starterPrice.textContent = '829';
+            proPrice.textContent = '2,079';
+            starterPeriod.textContent = ' /month (billed yearly)';
+            proPeriod.textContent = ' /month (billed yearly)';
+            
+            yearlyLabel.classList.add('active');
+            monthlyLabel.classList.remove('active');
+        } else {
+            // Monthly billing rates
+            starterPrice.textContent = '999';
+            proPrice.textContent = '2,499';
+            starterPeriod.textContent = '/month';
+            proPeriod.textContent = '/month';
+            
+            monthlyLabel.classList.add('active');
+            yearlyLabel.classList.remove('active');
+        }
+    });
+</script>
+{% endblock %}

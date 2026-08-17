@@ -1,0 +1,687 @@
+{% extends "marketing/components/base_marketing.html" %}
+
+{% block title %}Modern Jewelry Retail Management Software | {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero section styles */
+    .hero-section {
+        padding: 5rem 0 6rem 0;
+        text-align: center;
+        position: relative;
+    }
+
+    .trust-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: rgba(212, 175, 55, 0.08);
+        border: 1px solid rgba(212, 175, 55, 0.25);
+        color: var(--primary-color);
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 2rem;
+        gap: 8px;
+    }
+
+    .hero-title {
+        font-size: 2.75rem;
+        line-height: 1.2;
+        font-weight: 800;
+        max-width: 800px;
+        margin: 0 auto 1.5rem auto;
+        color: var(--text-light);
+        letter-spacing: -1px;
+    }
+
+    @media(min-width: 768px) {
+        .hero-title { font-size: 4rem; }
+    }
+
+    .hero-title span {
+        background: linear-gradient(135deg, #fff, var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtext {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto 2.5rem auto;
+    }
+
+    @media(min-width: 768px) {
+        .hero-subtext { font-size: 1.3rem; }
+    }
+
+    .hero-ctas {
+        display: flex;
+        justify-content: center;
+        gap: 1.25rem;
+        margin-bottom: 4rem;
+        flex-wrap: wrap;
+    }
+
+    /* Trust section */
+    .trust-section {
+        padding: 2rem 0;
+        text-align: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        background: rgba(255, 255, 255, 0.01);
+    }
+
+    .trust-text {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 1.5rem;
+    }
+
+    .trust-logos {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .trust-logo-item {
+        display: flex;
+        align-items: center;
+        color: var(--text-muted);
+        font-weight: 700;
+        font-size: 1.1rem;
+        gap: 6px;
+        opacity: 0.65;
+        transition: var(--transition);
+    }
+
+    .trust-logo-item:hover {
+        opacity: 1;
+        color: var(--primary-color);
+    }
+
+    /* Mock Dashboard Component */
+    .dashboard-preview-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0.5rem;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    .mock-dashboard {
+        background-color: var(--bg-dark);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        font-family: sans-serif;
+    }
+
+    .mock-dash-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        background-color: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .mock-dash-logo {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+
+    .mock-dash-logo i { color: var(--primary-color); }
+
+    .mock-dash-store {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.05);
+        padding: 3px 10px;
+        border-radius: 4px;
+    }
+
+    .mock-dash-body {
+        padding: 1.5rem;
+        text-align: left;
+    }
+
+    .mock-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .mock-card {
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        padding: 1.25rem;
+        border-radius: 8px;
+    }
+
+    .mock-card-title {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .mock-card-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+    }
+
+    .mock-card-value.gold { color: var(--primary-color); }
+    .mock-card-value.sales { color: #48bb78; }
+
+    .mock-table-card {
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        padding: 1.25rem;
+    }
+
+    .mock-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+    }
+
+    .mock-table th, .mock-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .mock-table th { color: var(--text-muted); }
+    .mock-badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+
+    .mock-badge.active { background-color: rgba(72, 187, 120, 0.15); color: #48bb78; }
+    .mock-badge.repair { background-color: rgba(237, 137, 54, 0.15); color: #ed8936; }
+
+    /* Problem Section */
+    .problem-section {
+        padding: 6rem 0;
+    }
+
+    .section-header {
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto 4rem auto;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+
+    @media(min-width: 768px) {
+        .section-title { font-size: 2.5rem; }
+    }
+
+    .section-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    .problem-box, .solution-box {
+        background-color: var(--bg-card);
+        border-radius: 12px;
+        padding: 2.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .problem-box { border-left: 4px solid #f56565; }
+    .solution-box { border-left: 4px solid var(--primary-color); }
+
+    .box-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .problem-box .box-title { color: #f56565; }
+    .solution-box .box-title { color: var(--primary-color); }
+
+    .problem-list, .solution-list {
+        list-style: none;
+    }
+
+    .problem-list li, .solution-list li {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        font-size: 0.95rem;
+    }
+
+    .problem-list li i { color: #f56565; margin-top: 3px; }
+    .solution-list li i { color: var(--primary-color); margin-top: 3px; }
+
+    /* How It Works Section */
+    .steps-section {
+        padding: 6rem 0;
+        background-color: rgba(255, 255, 255, 0.01);
+        border-top: 1px solid rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    .step-card {
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        padding: 2.5rem 2rem;
+        border-radius: 12px;
+        text-align: center;
+        position: relative;
+        transition: var(--transition);
+    }
+
+    .step-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+    }
+
+    .step-num {
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: #0f1115;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+    }
+
+    .step-icon {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .step-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+    }
+
+    .step-desc {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Benefits Outcomes Section */
+    .benefits-section {
+        padding: 6rem 0;
+    }
+
+    .benefit-card {
+        background-color: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        padding: 2.5rem;
+        transition: var(--transition);
+    }
+
+    .benefit-card:hover {
+        border-color: rgba(212, 175, 55, 0.3);
+    }
+
+    .benefit-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .benefit-icon {
+        width: 48px;
+        height: 48px;
+        background-color: rgba(212, 175, 55, 0.1);
+        color: var(--primary-color);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .benefit-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .benefit-list {
+        list-style: none;
+        margin-bottom: 2rem;
+    }
+
+    .benefit-list li {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .benefit-list li i {
+        color: var(--primary-color);
+    }
+
+    .benefit-outcome {
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 1.25rem;
+    }
+
+    .benefit-outcome-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--primary-color);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .benefit-outcome-text {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-light);
+    }
+
+    /* CTA Section styles */
+    .cta-section {
+        padding: 5rem 0;
+        text-align: center;
+    }
+
+    .cta-card {
+        background: linear-gradient(135deg, var(--bg-card), #1b202a);
+        border: 1px solid var(--border-color);
+        padding: 4rem 2rem;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+
+    .cta-title {
+        font-size: 2.25rem;
+        font-weight: 800;
+        margin-bottom: 1.25rem;
+    }
+
+    .cta-subtext {
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto 2.5rem auto;
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="trust-badge">
+            <i class='bx bxs-check-shield'></i> Built Specifically for Jewelry Retailers
+        </div>
+        <h1 class="hero-title">
+            The Operating System For <span>Modern Jewelry Retailers</span>
+        </h1>
+        <p class="hero-subtext">
+            From dynamic gold weight tracking to POS billing and repair lifecycle management. Grow your jewelry store faster with less manual chaos.
+        </p>
+        <div class="hero-ctas">
+            <a href="{% url 'demo_page' %}" class="btn btn-primary">Book a Free Demo <i class='bx bx-right-arrow-alt'></i></a>
+            <a href="{% url 'pricing_page' %}" class="btn btn-secondary">View Pricing plans</a>
+        </div>
+
+        <!-- Glassmorphism Mock Dashboard Preview -->
+        <div class="dashboard-preview-container">
+            <div class="mock-dashboard">
+                <div class="mock-dash-header">
+                    <div class="mock-dash-logo">
+                        <i class='bx bxs-diamond'></i>
+                        <span>Aureate Dashboard</span>
+                    </div>
+                    <div class="mock-dash-store">
+                        <i class='bx bxs-store-alt' style="color: var(--primary-color);"></i> Shiv Jewellers (Rajkot)
+                    </div>
+                </div>
+                <div class="mock-dash-body">
+                    <div class="mock-card-grid">
+                        <div class="mock-card">
+                            <div class="mock-card-title">Gold Inventory (22K & 24K)</div>
+                            <div class="mock-card-value gold">₹2,45,00,000</div>
+                        </div>
+                        <div class="mock-card">
+                            <div class="mock-card-title">Today's Sales Revenue</div>
+                            <div class="mock-card-value sales">₹4,25,000</div>
+                        </div>
+                        <div class="mock-card">
+                            <div class="mock-card-title">Active Repair Orders</div>
+                            <div class="mock-card-value">12 Orders</div>
+                        </div>
+                    </div>
+                    <div class="mock-table-card">
+                        <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 0.5rem;">Recent Inventory Transactions</div>
+                        <table class="mock-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Type</th>
+                                    <th>Karat</th>
+                                    <th>Weight (g)</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Gold Bridal Necklace</td>
+                                    <td>22K</td>
+                                    <td>45.50g</td>
+                                    <td>₹3,15,400</td>
+                                    <td><span class="mock-badge active">In Stock</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Diamond Eternity Band</td>
+                                    <td>18K</td>
+                                    <td>6.20g</td>
+                                    <td>₹1,85,000</td>
+                                    <td><span class="mock-badge active">In Stock</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Gold Chain Repair</td>
+                                    <td>22K</td>
+                                    <td>12.40g</td>
+                                    <td>Job Card #842</td>
+                                    <td><span class="mock-badge repair">Under Repair</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Trust Branding Section -->
+<section class="trust-section">
+    <div class="container">
+        <p class="trust-text">Designed specifically for jewelry retail formats</p>
+        <div class="trust-logos">
+            <span class="trust-logo-item"><i class='bx bxs-badge-check'></i> Gold Shops</span>
+            <span class="trust-logo-item"><i class='bx bxs-purchase-tag'></i> Diamond Boutiques</span>
+            <span class="trust-logo-item"><i class='bx bxs-buildings'></i> Multi-Store Chains</span>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    
+    <!-- Problem-Solution Section -->
+    <section class="problem-section">
+        <div class="section-header">
+            <h2 class="section-title">Running a Jewelry Store is Complicated</h2>
+            <p class="section-subtitle">We replace manual ledgers and outdated systems with a single platform engineered for jewellers.</p>
+        </div>
+        
+        <div class="grid grid-2">
+            <div class="problem-box">
+                <h3 class="box-title"><i class='bx bx-error-circle'></i> The Old Ledger Chaos</h3>
+                <ul class="problem-list">
+                    <li><i class='bx bx-x'></i> Inventory weight records do not match actual stock counts.</li>
+                    <li><i class='bx bx-x'></i> Fluctuating daily gold rates cause calculation errors.</li>
+                    <li><i class='bx bx-x'></i> Customers gold exchanges and old gold balances are scattered.</li>
+                    <li><i class='bx bx-x'></i> Repair jobs get delayed because cards are lost.</li>
+                </ul>
+            </div>
+            
+            <div class="solution-box">
+                <h3 class="box-title"><i class='bx bx-check-circle'></i> The Aureate Solution</h3>
+                <ul class="solution-list">
+                    <li><i class='bx bx-check'></i> Automate dynamic pricing based on daily gold & silver rates.</li>
+                    <li><i class='bx bx-check'></i> Track weights, labor charges, stone values, and SKU tags.</li>
+                    <li><i class='bx bx-check'></i> Manage old gold balances and customer ledgers instantly.</li>
+                    <li><i class='bx bx-check'></i> Assign repair technicians and track statuses digitally.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Outcomes & Benefits (3 Cards) -->
+    <section class="benefits-section">
+        <div class="section-header">
+            <h2 class="section-title">Focus on Outcomes, Not Features</h2>
+            <p class="section-subtitle">We design workflows to deliver outcomes that impact your shop's bottom line.</p>
+        </div>
+
+        <div class="grid grid-3">
+            <!-- Card 1 -->
+            <div class="benefit-card">
+                <div class="benefit-header">
+                    <div class="benefit-icon"><i class='bx bxs-box'></i></div>
+                    <h3 class="benefit-title">Control Inventory</h3>
+                </div>
+                <ul class="benefit-list">
+                    <li><i class='bx bx-check-double'></i> Karat weight breakdown</li>
+                    <li><i class='bx bx-check-double'></i> Dynamic rate recalculations</li>
+                    <li><i class='bx bx-check-double'></i> Barcode generation</li>
+                </ul>
+                <div class="benefit-outcome">
+                    <div class="benefit-outcome-label">Ultimate Outcome</div>
+                    <div class="benefit-outcome-text">Know exactly what you own.</div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="benefit-card">
+                <div class="benefit-header">
+                    <div class="benefit-icon"><i class='bx bxs-receipt'></i></div>
+                    <h3 class="benefit-title">Faster POS Billing</h3>
+                </div>
+                <ul class="benefit-list">
+                    <li><i class='bx bx-check-double'></i> GST-compliant invoices</li>
+                    <li><i class='bx bx-check-double'></i> Snapshotted metal rates</li>
+                    <li><i class='bx bx-check-double'></i> Quick customer search</li>
+                </ul>
+                <div class="benefit-outcome">
+                    <div class="benefit-outcome-label">Ultimate Outcome</div>
+                    <div class="benefit-outcome-text">Complete sales in seconds.</div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="benefit-card">
+                <div class="benefit-header">
+                    <div class="benefit-icon"><i class='bx bxs-wrench'></i></div>
+                    <h3 class="benefit-title">Manage Repairs</h3>
+                </div>
+                <ul class="benefit-list">
+                    <li><i class='bx bx-check-double'></i> Digital job cards</li>
+                    <li><i class='bx bx-check-double'></i> Estimate vs actual cost</li>
+                    <li><i class='bx bx-check-double'></i> Technician assignment</li>
+                </ul>
+                <div class="benefit-outcome">
+                    <div class="benefit-outcome-label">Ultimate Outcome</div>
+                    <div class="benefit-outcome-text">Never lose a repair order.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="steps-section">
+        <div class="section-header">
+            <h2 class="section-title">Start Managing Your Shop in 3 Steps</h2>
+            <p class="section-subtitle">No long onboarding required. Get up and running in minutes.</p>
+        </div>
+
+        <div class="grid grid-3">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-icon"><i class='bx bxs-store'></i></div>
+                <h3 class="step-title">Create Your Store</h3>
+                <p class="step-desc">Enter your shop profile, tax configuration, and select your currency settings.</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-icon"><i class='bx bxs-cabinet'></i></div>
+                <h3 class="step-title">Add Inventory</h3>
+                <p class="step-desc">Bulk import your products, input weights, and define make charges and labor options.</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-icon"><i class='bx bxs-printer'></i></div>
+                <h3 class="step-title">Start Billing</h3>
+                <p class="step-desc">Generate tag barcodes, print GST-ready POS receipts, and log transactions instantly.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-card">
+            <h2 class="cta-title">Ready to Modernize Your Jewelry Store?</h2>
+            <p class="cta-subtext">Join retail jewelry stores that run their business smarter using {{ SITE_NAME }}.</p>
+            <a href="{% url 'demo_page' %}" class="btn btn-primary btn-lg">Book a Free Live Demo <i class='bx bx-right-arrow-alt'></i></a>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

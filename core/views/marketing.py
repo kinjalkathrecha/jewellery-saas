@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
 from django.http import JsonResponse
+from django.shortcuts import redirect, render
 from django.utils import timezone
 
 
@@ -92,3 +93,55 @@ def health_check(request):
 
     status_code = 200 if is_healthy else 503
     return JsonResponse(response_data, status=status_code)
+
+
+def landing_page(request):
+    """
+    Public marketing home/landing page.
+    Redirects authenticated users directly to the private dashboard home.
+    """
+    if request.user.is_authenticated:
+        return redirect("dashboard:home")
+    return render(request, "marketing/landing.html")
+
+
+def features_page(request):
+    """
+    Detailed features deep-dive page.
+    """
+    return render(request, "marketing/features.html")
+
+
+def pricing_page(request):
+    """
+    SaaS pricing plans and comparison matrix.
+    """
+    return render(request, "marketing/pricing.html")
+
+
+def demo_page(request):
+    """
+    Book a Demo request form page.
+    """
+    return render(request, "marketing/demo.html")
+
+
+def contact_page(request):
+    """
+    General Contact form page.
+    """
+    return render(request, "marketing/contact.html")
+
+
+def about_page(request):
+    """
+    About Us and team background details page.
+    """
+    return render(request, "marketing/about.html")
+
+
+def resources_page(request):
+    """
+    SEO guides, blogs, and industry insights placeholder resources index.
+    """
+    return render(request, "marketing/resources.html")

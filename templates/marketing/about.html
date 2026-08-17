@@ -1,0 +1,73 @@
+{% extends "marketing/components/base_marketing.html" %}
+
+{% block title %}About Our Platform & Mission | {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-hero {
+        padding: 5rem 0 3rem 0;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .about-hero h1 {
+        font-size: 2.75rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+
+    .about-hero p {
+        color: var(--text-muted);
+        font-size: 1.25rem;
+        line-height: 1.6;
+    }
+
+    .mission-section {
+        padding: 5rem 0;
+        background-color: var(--bg-card);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        margin: 4rem 0;
+        padding: 4rem;
+    }
+
+    .mission-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        text-align: center;
+    }
+
+    .mission-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-light);
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Hero Header -->
+    <section class="about-hero">
+        <span class="feature-tag" style="display: inline-block; margin-bottom: 1rem;">Who We Are</span>
+        <h1>Built to Modernize the Traditional Jewelry Business</h1>
+        <p>Aureate was founded to build software tailored exclusively for the operational nuances of retail jewellers.</p>
+    </section>
+
+    <!-- Mission Panel -->
+    <section class="mission-section">
+        <h2 class="mission-title">Our Mission</h2>
+        <p class="mission-text">
+            For decades, independent jewelry store retailers have managed billions in high-value gold and gem inventories using paper ledgers or generic, complex ERPs. We believe that jewellers deserve simple, modern tools built for their specific requirements: dynamic metal rate pricing, Karat purity management, wastage adjustments, and secure tenant environments.
+        </p>
+    </section>
+
+</div>
+{% endblock %}

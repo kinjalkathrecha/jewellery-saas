@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ SITE_NAME }} - {{ SITE_TAGLINE }}{% endblock %}</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block meta_description %}{{ SITE_DESCRIPTION }}{% endblock %}">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    
+    <!-- OpenGraph Social Sharing Meta Tags -->
+    <meta property="og:title" content="{% block og_title %}{{ SITE_NAME }} - {{ SITE_TAGLINE }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ SITE_DESCRIPTION }}{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{% block og_image %}/static/brand/og-image.png{% endblock %}">
+    <meta property="og:site_name" content="{{ SITE_NAME }}">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Boxicons for modern iconography -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    
+    <!-- Structured Schema.org B2B SaaS Application Metadata -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "{{ SITE_NAME }}",
+        "description": "{{ SITE_DESCRIPTION }}",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "All",
+        "offers": {
+            "@type": "Offer",
+            "priceCurrency": "INR",
+            "price": "999.00"
+        }
+    }
+    </script>
+    
+    <!-- Global Analytics Placeholder (Google Tag Manager & Clarity Slots) -->
+    <!-- Google Analytics: {{ GOOGLE_ANALYTICS_ID }} -->
+    <!-- Microsoft Clarity ID: {{ CLARITY_ID }} -->
+
+    <style>
+        :root {
+            --primary-color: #d4af37; /* Metallic Gold Accent */
+            --primary-dark: #b89326;
+            --primary-light: #f3e5ab;
+            --bg-dark: #0f1115; /* Modern Sleek Off-Black */
+            --bg-card: #181c24; /* Elevated Slate/Charcoal */
+            --border-color: rgba(212, 175, 55, 0.15);
+            --text-light: #f8f9fa;
+            --text-muted: #a0aec0;
+            --font-family: 'Outfit', sans-serif;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Reusable components: Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.75rem;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: #0f1115;
+            border: none;
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Container alignments */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Grid setups */
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .grid-2 { grid-template-columns: 1fr; }
+        .grid-3 { grid-template-columns: 1fr; }
+
+        @media(min-width: 768px) {
+            .grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* Header Navbar Glassmorphism */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background-color: rgba(15, 17, 21, 0.85);
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            gap: 8px;
+        }
+
+        .logo i {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: none;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        @media(min-width: 992px) {
+            .nav-links { display: flex; }
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color);
+        }
+
+        .nav-actions {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        @media(min-width: 992px) {
+            .nav-actions { display: flex; }
+        }
+
+        /* Mobile hamburger trigger */
+        .mobile-toggle {
+            display: block;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        @media(min-width: 992px) {
+            .mobile-toggle { display: none; }
+        }
+
+        /* Mobile Drawer Sidebar menu */
+        .mobile-drawer {
+            position: fixed;
+            top: 80px;
+            left: -100%;
+            width: 100%;
+            height: calc(100vh - 80px);
+            background-color: var(--bg-dark);
+            z-index: 999;
+            transition: var(--transition);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+        }
+
+        .mobile-drawer.open {
+            left: 0;
+        }
+
+        .mobile-drawer-links {
+            display: flex;
+            flex-column: column;
+            gap: 1.5rem;
+            flex-direction: column;
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-drawer-link {
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: block;
+        }
+
+        /* Footer layouts */
+        .footer {
+            background-color: #0b0d10;
+            border-top: 1px solid var(--border-color);
+            padding: 4rem 0 2rem 0;
+            margin-top: 5rem;
+        }
+
+        .footer-grid {
+            margin-bottom: 3rem;
+        }
+
+        .footer-about p {
+            color: var(--text-muted);
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+            padding-left: 4px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        @media(min-width: 768px) {
+            .footer-bottom {
+                flex-direction: row;
+            }
+        }
+
+        .footer-bottom p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Main Content Padding wrapper */
+        .main-content {
+            padding-top: 120px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="{% url 'landing_page' %}" class="logo">
+                    <i class='bx bxs-diamond'></i>
+                    <span>{{ SITE_NAME }}</span>
+                </a>
+                
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="{% url 'landing_page' %}" class="nav-link {% if request.resolver_match.url_name == 'landing_page' %}active{% endif %}">Home</a></li>
+                        <li><a href="{% url 'features_page' %}" class="nav-link {% if request.resolver_match.url_name == 'features_page' %}active{% endif %}">Features</a></li>
+                        <li><a href="{% url 'pricing_page' %}" class="nav-link {% if request.resolver_match.url_name == 'pricing_page' %}active{% endif %}">Pricing</a></li>
+                        <li><a href="{% url 'about_page' %}" class="nav-link {% if request.resolver_match.url_name == 'about_page' %}active{% endif %}">About Us</a></li>
+                        <li><a href="{% url 'resources_page' %}" class="nav-link {% if request.resolver_match.url_name == 'resources_page' %}active{% endif %}">Resources</a></li>
+                        <li><a href="{% url 'contact_page' %}" class="nav-link {% if request.resolver_match.url_name == 'contact_page' %}active{% endif %}">Contact</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-actions">
+                    <a href="{% url 'accounts:login' %}" class="btn btn-secondary">Sign In</a>
+                    <a href="{% url 'demo_page' %}" class="btn btn-primary">Book Demo</a>
+                </div>
+
+                <button class="mobile-toggle" id="menuToggle">
+                    <i class='bx bx-menu'></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer menu -->
+    <div class="mobile-drawer" id="mobileDrawer">
+        <ul class="mobile-drawer-links">
+            <li><a href="{% url 'landing_page' %}" class="mobile-drawer-link">Home</a></li>
+            <li><a href="{% url 'features_page' %}" class="mobile-drawer-link">Features</a></li>
+            <li><a href="{% url 'pricing_page' %}" class="mobile-drawer-link">Pricing</a></li>
+            <li><a href="{% url 'about_page' %}" class="mobile-drawer-link">About Us</a></li>
+            <li><a href="{% url 'resources_page' %}" class="mobile-drawer-link">Resources</a></li>
+            <li><a href="{% url 'contact_page' %}" class="mobile-drawer-link">Contact</a></li>
+            <li><hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;"></li>
+            <li><a href="{% url 'accounts:login' %}" class="mobile-drawer-link" style="color: var(--primary-color);">Sign In</a></li>
+            <li><a href="{% url 'demo_page' %}" class="mobile-drawer-link" style="color: var(--primary-color);">Book Demo</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content render -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="grid grid-3 footer-grid">
+                <div class="footer-about">
+                    <a href="{% url 'landing_page' %}" class="logo">
+                        <i class='bx bxs-diamond'></i>
+                        <span>{{ SITE_NAME }}</span>
+                    </a>
+                    <p>{{ SITE_DESCRIPTION }}</p>
+                </div>
+                <div>
+                    <h3 class="footer-title">Product</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'features_page' %}">Features</a></li>
+                        <li><a href="{% url 'pricing_page' %}">Pricing plans</a></li>
+                        <li><a href="{% url 'demo_page' %}">Request demo</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="footer-title">Company</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'about_page' %}">About us</a></li>
+                        <li><a href="{% url 'resources_page' %}">Resources & Guides</a></li>
+                        <li><a href="{% url 'contact_page' %}">Contact sales</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; {% now "Y" %} {{ SITE_NAME }}. All rights reserved.</p>
+                <p>Built for jewelry store retailers with <i class='bx bxs-heart' style="color: #e25555;"></i></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Hamburger Drawer Toggler
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileDrawer = document.getElementById('mobileDrawer');
+        const menuIcon = menuToggle.querySelector('i');
+
+        menuToggle.addEventListener('click', () => {
+            mobileDrawer.classList.toggle('open');
+            if (mobileDrawer.classList.contains('open')) {
+                menuIcon.className = 'bx bx-x';
+            } else {
+                menuIcon.className = 'bx bx-menu';
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

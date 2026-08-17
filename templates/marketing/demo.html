@@ -1,0 +1,213 @@
+{% extends "marketing/components/base_marketing.html" %}
+
+{% block title %}Book a Free Demo | {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        padding: 4rem 0 6rem 0;
+        max-width: 550px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        padding: 3rem;
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .form-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-header p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-light);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: var(--bg-dark);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: var(--text-light);
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: var(--transition);
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
+    }
+
+    /* Honeypot Spam Protection Field (Hidden from human visitors) */
+    .hp-field {
+        display: none !important;
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        z-index: -1;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: none;
+    }
+
+    .alert-success {
+        background-color: rgba(72, 187, 120, 0.1);
+        border: 1px solid rgba(72, 187, 120, 0.2);
+        color: #48bb78;
+    }
+
+    .alert-danger {
+        background-color: rgba(245, 101, 101, 0.1);
+        border: 1px solid rgba(245, 101, 101, 0.2);
+        color: #f56565;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="form-section">
+        <div class="form-card">
+            <div class="form-header">
+                <h1>Book a Live Demo</h1>
+                <p>See how Aureate fits your jewelry retail workflow. No commitments.</p>
+            </div>
+
+            <!-- AJAX Response Alert box -->
+            <div class="alert alert-success" id="successAlert"></div>
+            <div class="alert alert-danger" id="errorAlert"></div>
+
+            <form id="demoForm" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="lead_type" value="DEMO">
+                
+                <!-- Honeypot Field -->
+                <div class="hp-field">
+                    <label for="website">Please leave this field blank</label>
+                    <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="name">Your Name *</label>
+                    <input type="text" class="form-input" id="name" name="name" required placeholder="e.g. Kinjal Kathrecha">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="shop_name">Jewelry Shop Name *</label>
+                    <input type="text" class="form-input" id="shop_name" name="shop_name" required placeholder="e.g. Shiv Jewellers">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address *</label>
+                    <input type="email" class="form-input" id="email" name="email" required placeholder="e.g. contact@shivjewels.com">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number *</label>
+                    <input type="tel" class="form-input" id="phone" name="phone" required placeholder="e.g. +91 98765 43210">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="message">Specific Needs or Questions (Optional)</label>
+                    <textarea class="form-input" id="message" name="message" rows="4" placeholder="Tell us about your inventory size or current software..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                    Schedule Free Demo <i class='bx bx-calendar-event'></i>
+                </button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('demoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+
+        // Reset status alert boxes
+        successAlert.style.display = 'none';
+        errorAlert.style.display = 'none';
+
+        // Disable button during active network flight
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Sending... <i class="bx bx-loader-alt bx-spin"></i>';
+
+        const formData = new FormData(form);
+
+        fetch('{% url "submit_lead_api" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Schedule Free Demo <i class="bx bx-calendar-event"></i>';
+
+            if (data.success) {
+                successAlert.textContent = data.message;
+                successAlert.style.display = 'block';
+                form.reset();
+            } else {
+                let errorMsg = 'Validation failed: ';
+                if (data.errors) {
+                    const errorFields = Object.keys(data.errors);
+                    errorMsg += errorFields.map(f => `${f}: ${data.errors[f].join(', ')}`).join('; ');
+                } else {
+                    errorMsg += data.message || 'Unknown error occurred.';
+                }
+                errorAlert.textContent = errorMsg;
+                errorAlert.style.display = 'block';
+            }
+        })
+        .catch(err => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Schedule Free Demo <i class="bx bx-calendar-event"></i>';
+            errorAlert.textContent = 'A connection error occurred. Please try again.';
+            errorAlert.style.display = 'block';
+        });
+    });
+</script>
+{% endblock %}
