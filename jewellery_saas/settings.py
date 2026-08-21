@@ -15,10 +15,14 @@ env = environ.Env()
 # Read environment variables from .env file
 environ.Env.read_env(BASE_DIR / ".env")
 
-SECRET_KEY = env.str("SECRET_KEY", default="django-insecure-1!-)oc%%&_56+yhvss8kv7i(lf!dp(55-=-bcet%ncdh7=%ovf")
-DEBUG = env.bool("DEBUG", default=True)
+SECRET_KEY = env.str("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable must be set")
+DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1", "[::1]"] if DEBUG else [])
+if not ALLOWED_HOSTS and not DEBUG:
+    raise ValueError("ALLOWED_HOSTS must be configured in production")
 
 # Application definition
 INSTALLED_APPS = [
@@ -41,15 +45,16 @@ INSTALLED_APPS = [
     "dashboard",
     "repairs",
     "barcodes",
+    "audit",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
-    "core.middleware.CorrelationIdMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "core.middleware.CorrelationIdMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -91,9 +96,10 @@ DATABASES = {
         "PORT": env.str("DB_PORT", default="5432"),
         "CONN_MAX_AGE": 600,  # Keep database connections open for 10 minutes
         "CONN_HEALTH_CHECKS": True,  # Test database connection health before reusing
-        "ATOMIC_REQUESTS": True,  # Run HTTP requests in atomic transactions
+        "ATOMIC_REQUESTS": False,  # Run HTTP requests in atomic transactions
         "OPTIONS": {
             "connect_timeout": 10,  # Prevent long hangs if database is offline
+            "options": "-c statement_timeout=30000",
         },
     }
 }
@@ -211,6 +217,10 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Kolkata"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_TASK_TIME_LIMIT = 5 * 60         # Hard timeout (5 minutes)
+CELERY_TASK_SOFT_TIME_LIMIT = 4 * 60    # Soft timeout (4 minutes)
+CELERY_TASK_DEFAULT_RETRY_DELAY = 60
+CELERY_TASK_MAX_RETRIES = 3
 
 # Celery Beat Scheduler configuration
 CELERY_BEAT_SCHEDULE = {
@@ -251,3 +261,18 @@ APP_VERSION = env.str("APP_VERSION", default="0.96")
 SITE_NAME = env.str("SITE_NAME", default="Aureate")
 SITE_TAGLINE = env.str("SITE_TAGLINE", default="Operating System for Modern Jewelry Retailers")
 SITE_DESCRIPTION = env.str("SITE_DESCRIPTION", default="Jewelry inventory, billing and repair management software")
+
+# Security and HTTPS configurations for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = "DENY"
+    SECURE_CONTENT_SECURITY_POLICY = {
+        "default-src": ("'self'",),
+    }

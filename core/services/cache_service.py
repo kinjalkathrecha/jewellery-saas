@@ -57,6 +57,11 @@ def get_subscription_status(shop_id):
     return cache.get(key)
 
 
+def get_or_set_subscription_status(shop_id, callback):
+    key = get_subscription_key(shop_id)
+    return cache.get_or_set(key, callback, TIMEOUT_SUBSCRIPTION)
+
+
 def invalidate_subscription(shop_id):
     key = get_subscription_key(shop_id)
     cache.delete(key)

@@ -80,40 +80,42 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         form.instance.shop = self.request.shop
 
         if form.is_valid() and items.is_valid():
-            self.object = form.save()
+            from django.db import transaction
+            with transaction.atomic():
+                self.object = form.save()
 
-            # Save invoice items using commit=False to set the rate audit field
-            invoice_items = items.save(commit=False)
-            subtotal = 0
-            for item in invoice_items:
-                item.invoice = self.object
+                # Save invoice items using commit=False to set the rate audit field
+                invoice_items = items.save(commit=False)
+                subtotal = 0
+                for item in invoice_items:
+                    item.invoice = self.object
 
-                # Fetch and store today's metal rate for audit
-                if item.item and item.item.metal_type != "FIXED":
-                    from inventory.models import MetalRate
+                    # Fetch and store today's metal rate for audit
+                    if item.item and item.item.metal_type != "FIXED":
+                        from inventory.models import MetalRate
 
-                    rate_val = MetalRate.get_current_rate(self.request.shop, item.item.metal_type)
-                    if rate_val:
-                        item.invoice_metal_rate = rate_val
+                        rate_val = MetalRate.get_current_rate(self.request.shop, item.item.metal_type)
+                        if rate_val:
+                            item.invoice_metal_rate = rate_val
 
-                item.save()
-                subtotal += item.amount
+                    item.save()
+                    subtotal += item.amount
 
-                # Logic to deduct stock
-                if item.item:
-                    item.item.stock_quantity -= item.quantity
-                    item.item.save()
+                    # Logic to deduct stock
+                    if item.item:
+                        item.item.stock_quantity -= item.quantity
+                        item.item.save()
 
-            items.save_m2m()
+                items.save_m2m()
 
-            self.object.subtotal = subtotal
-            self.object.total_amount = subtotal + self.object.tax_amount
-            self.object.save()
+                self.object.subtotal = subtotal
+                self.object.total_amount = subtotal + self.object.tax_amount
+                self.object.save()
 
-            # Update customer total spent
-            if self.object.customer:
-                self.object.customer.total_spent += self.object.total_amount
-                self.object.customer.save()
+                # Update customer total spent
+                if self.object.customer:
+                    self.object.customer.total_spent += self.object.total_amount
+                    self.object.customer.save()
 
             return redirect(self.get_success_url())
         else:

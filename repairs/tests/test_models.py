@@ -35,7 +35,8 @@ def test_repair_image_path_helper():
         expected_delivery_date=timezone.now().date(),
     )
     path = get_repair_image_path(repair, "test.png")
-    assert path == f"repair_images/shop_{shop.id}/test.png"
+    assert path.startswith(f"repair_images/shop_{shop.id}/")
+    assert path.endswith(".png")
 
 
 @pytest.mark.django_db

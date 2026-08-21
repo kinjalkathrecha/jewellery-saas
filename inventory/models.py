@@ -1,9 +1,15 @@
 import uuid
+import os
 
 from django.db import models
 from django.utils import timezone
 
 from core.models import Shop
+from core.validators import validate_image_upload
+
+def get_jewellery_image_path(instance, filename):
+    ext = os.path.splitext(filename)[1].lower()
+    return f"jewellery_images/{instance.uuid.hex}{ext}"
 
 
 class Category(models.Model):
@@ -77,7 +83,7 @@ class JewelleryItem(models.Model):
     ]
 
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name="items")
-    item_name = models.CharField(max_length=200)
+    item_name = models.CharField(max_length=200, db_index=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="items")
     metal_type = models.CharField(max_length=20, choices=METAL_CHOICES, default="FIXED")
     weight_in_grams = models.DecimalField(max_digits=10, decimal_places=3)
@@ -88,7 +94,7 @@ class JewelleryItem(models.Model):
     price = models.DecimalField(max_digits=15, decimal_places=2)  # represents selling price
     stock_quantity = models.IntegerField(default=0)
     design_code = models.CharField(max_length=50, blank=True, null=True)
-    image = models.ImageField(upload_to="jewellery_images/", blank=True, null=True)
+    image = models.ImageField(upload_to=get_jewellery_image_path, blank=True, null=True, validators=[validate_image_upload])
 
     # Barcode & UUID additions
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -105,6 +111,8 @@ class JewelleryItem(models.Model):
         indexes = [
             models.Index(fields=["shop", "design_code"]),
             models.Index(fields=["uuid"]),
+            models.Index(fields=["shop", "created_at"]),
+            models.Index(fields=["metal_type", "price"]),
         ]
 
     def calculate_price_for_rate(self, rate_per_gram):
@@ -122,16 +130,23 @@ class JewelleryItem(models.Model):
         return self.price
 
     def save(self, *args, **kwargs):
+        from decimal import Decimal
+        self.weight_in_grams = Decimal(str(self.weight_in_grams))
+        self.making_charges = Decimal(str(self.making_charges))
+        self.profit_margin = Decimal(str(self.profit_margin))
+        self.metal_rate_used = Decimal(str(self.metal_rate_used))
+        self.price = Decimal(str(self.price))
+
         if self.metal_type and self.metal_type != "FIXED":
             rate = MetalRate.get_current_rate(self.shop, self.metal_type)
             if rate is not None:
-                self.metal_rate_used = rate
+                self.metal_rate_used = Decimal(str(rate))
             self.metal_cost = self.weight_in_grams * self.metal_rate_used
             self.price = self.metal_cost + self.making_charges + self.profit_margin
         else:
-            self.metal_rate_used = 0.00
-            self.metal_cost = 0.00
-            self.profit_margin = 0.00
+            self.metal_rate_used = Decimal("0.00")
+            self.metal_cost = Decimal("0.00")
+            self.profit_margin = Decimal("0.00")
         super().save(*args, **kwargs)
 
     def __str__(self):

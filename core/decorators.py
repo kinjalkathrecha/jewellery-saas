@@ -69,8 +69,14 @@ def redis_rate_limit(key_prefix, limit, period, limit_by="ip"):
                         response["Retry-After"] = str(period)
                         return response
             except Exception as e:
-                # Fail open to prevent redis connection failure from blocking user access
                 logger.error(f"[Rate Limit Error] Failed to enforce rate limit: {e}")
+                if request.path.startswith("/api/") or "application/json" in request.META.get("HTTP_ACCEPT", ""):
+                    return JsonResponse({"error": "Service temporarily unavailable"}, status=503)
+                else:
+                    return HttpResponse(
+                        "<h1>503 Service Temporarily Unavailable</h1><p>The service is temporarily unavailable. Please try again later.</p>",
+                        status=503,
+                    )
 
             return view_func(request, *args, **kwargs)
 

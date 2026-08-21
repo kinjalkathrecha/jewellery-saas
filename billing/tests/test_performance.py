@@ -31,6 +31,6 @@ def test_invoice_detail_query_budget(django_assert_num_queries):
     client.login(username="admin1", password="password")
     url = reverse("billing:invoice_detail", kwargs={"pk": invoice.pk})
 
-    with django_assert_num_queries(9):
+    with django_assert_num_queries(7):
         response = client.get(url)
         assert response.status_code == 200

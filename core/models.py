@@ -1,7 +1,14 @@
 from datetime import timedelta
+import os
+import uuid
 
 from django.db import models
 from django.utils import timezone
+from core.validators import validate_image_upload
+
+def get_shop_logo_path(instance, filename):
+    ext = os.path.splitext(filename)[1].lower()
+    return f"shop_logos/{uuid.uuid4().hex}{ext}"
 
 
 class SubscriptionPlan(models.Model):
@@ -22,7 +29,7 @@ class Shop(models.Model):
     phone_number = models.CharField(max_length=20)
     address = models.TextField(blank=True, null=True)
     gstin = models.CharField(max_length=50, blank=True, null=True, verbose_name="GSTIN / Tax Details")
-    logo = models.ImageField(upload_to="shop_logos/", blank=True, null=True)
+    logo = models.ImageField(upload_to=get_shop_logo_path, blank=True, null=True, validators=[validate_image_upload])
     terms_and_conditions = models.TextField(
         blank=True, null=True, help_text="These will appear at the bottom of your invoices"
     )
@@ -50,13 +57,26 @@ class Shop(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        if not self.pk and not self.trial_ends_at:
+        is_new = not self.pk
+        if is_new and not self.trial_ends_at:
             # 7 days trial by default
             self.trial_ends_at = timezone.now() + timedelta(days=7)
+        
+        # Smart invalidation check
+        should_invalidate_sub = True
+        if not is_new:
+            try:
+                original = self.__class__.objects.get(pk=self.pk)
+                if original.active_subscription_id == self.active_subscription_id and original.trial_ends_at == self.trial_ends_at:
+                    should_invalidate_sub = False
+            except self.__class__.DoesNotExist:
+                pass
+
         super().save(*args, **kwargs)
         from core.services import cache_service
 
-        cache_service.invalidate_subscription(self.id)
+        if should_invalidate_sub:
+            cache_service.invalidate_subscription(self.id)
         cache_service.invalidate_dashboard(self.id)
 
     def delete(self, *args, **kwargs):
@@ -67,40 +87,29 @@ class Shop(models.Model):
         cache_service.invalidate_subscription(shop_id)
         cache_service.invalidate_dashboard(shop_id)
 
-    def get_subscription_status(self):
-        from core.services import cache_service
-
-        cached_status = cache_service.get_subscription_status(self.id)
-        if cached_status is not None:
-            return cached_status
-
+    def _calculate_subscription_status(self):
         from django.conf import settings
-
         grace_days = getattr(settings, "SUBSCRIPTION_GRACE_DAYS", 3)
         now = timezone.now()
 
         if not self.is_active:
-            status_data = {
+            return {
                 "active": False,
                 "status": "DISABLED",
                 "message": "Shop deactivated by administrator.",
                 "days_left": 0,
                 "is_locked": True,
             }
-            cache_service.set_subscription_status(self.id, status_data)
-            return status_data
 
         sub = self.active_subscription
         if not sub:
-            status_data = {
+            return {
                 "active": False,
                 "status": "NO_PLAN",
                 "message": "No active subscription plan.",
                 "days_left": 0,
                 "is_locked": True,
             }
-            cache_service.set_subscription_status(self.id, status_data)
-            return status_data
 
         expires_at = sub.expires_at
         grace_ends_at = expires_at + timedelta(days=grace_days)
@@ -120,7 +129,7 @@ class Shop(models.Model):
                     if is_trial
                     else f"Subscription expires in {hours_left} hours."
                 )
-            status_data = {
+            return {
                 "active": True,
                 "status": sub.status,
                 "message": msg,
@@ -135,7 +144,7 @@ class Shop(models.Model):
             else:
                 hours_left = max(0, int(delta.total_seconds() / 3600))
                 msg = f"Subscription expired. Grace period ends in {hours_left} hours."
-            status_data = {
+            return {
                 "active": True,
                 "status": "GRACE_PERIOD",
                 "message": msg,
@@ -145,7 +154,7 @@ class Shop(models.Model):
         else:
             delta = now - expires_at
             days_ago = delta.days
-            status_data = {
+            return {
                 "active": False,
                 "status": "EXPIRED",
                 "message": f"Subscription expired {days_ago} days ago. Upgrade required.",
@@ -153,8 +162,9 @@ class Shop(models.Model):
                 "is_locked": True,
             }
 
-        cache_service.set_subscription_status(self.id, status_data)
-        return status_data
+    def get_subscription_status(self):
+        from core.services import cache_service
+        return cache_service.get_or_set_subscription_status(self.id, self._calculate_subscription_status)
 
     def __str__(self):
         return self.name

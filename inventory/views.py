@@ -136,12 +136,17 @@ class MetalRatesView(LoginRequiredMixin, TemplateView):
                         effective_from=effective_from,
                         created_by=request.user,
                     )
-                    # Trigger updating JewelleryItems
+                    # Trigger updating JewelleryItems via bulk_update for efficiency
                     items = JewelleryItem.objects.filter(shop=request.shop, metal_type=metal_code)
+                    bulk_items = []
                     for item in items:
-                        item.save()  # calculates new price with the saved rate automatically
+                        item.metal_rate_used = rate_val
+                        item.metal_cost = item.weight_in_grams * rate_val
+                        item.price = item.metal_cost + item.making_charges + item.profit_margin
+                        bulk_items.append(item)
+                    if bulk_items:
+                        JewelleryItem.objects.bulk_update(bulk_items, ["metal_rate_used", "metal_cost", "price"], batch_size=100)
                     updated_count += 1
-
             if updated_count > 0:
                 messages.success(
                     request,
