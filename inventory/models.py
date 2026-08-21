@@ -1,11 +1,12 @@
-import uuid
 import os
+import uuid
 
 from django.db import models
 from django.utils import timezone
 
 from core.models import Shop
 from core.validators import validate_image_upload
+
 
 def get_jewellery_image_path(instance, filename):
     ext = os.path.splitext(filename)[1].lower()

@@ -1,16 +1,16 @@
-import pytest
 from decimal import Decimal
 from unittest.mock import patch
 
+import pytest
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpRequest, HttpResponse
-from django.contrib.auth import get_user_model
 
-from core.validators import validate_image_upload
-from core.decorators import redis_rate_limit
 from audit.models import AuditLog
+from core.decorators import redis_rate_limit
 from core.models import Shop
+from core.validators import validate_image_upload
 from inventory.models import JewelleryItem
 
 

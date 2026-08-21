@@ -1,11 +1,12 @@
 import os
 import uuid
+
 from django.db import models
 
 from accounts.models import CustomUser
 from core.models import Shop
-from customers.models import Customer
 from core.validators import validate_image_upload
+from customers.models import Customer
 
 
 def get_repair_image_path(instance, filename):

@@ -1,5 +1,7 @@
 import os
+
 from django.core.exceptions import ValidationError
+
 
 def validate_image_upload(file):
     """

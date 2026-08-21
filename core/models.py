@@ -1,10 +1,12 @@
-from datetime import timedelta
 import os
 import uuid
+from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
+
 from core.validators import validate_image_upload
+
 
 def get_shop_logo_path(instance, filename):
     ext = os.path.splitext(filename)[1].lower()
