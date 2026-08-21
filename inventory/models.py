@@ -95,7 +95,9 @@ class JewelleryItem(models.Model):
     price = models.DecimalField(max_digits=15, decimal_places=2)  # represents selling price
     stock_quantity = models.IntegerField(default=0)
     design_code = models.CharField(max_length=50, blank=True, null=True)
-    image = models.ImageField(upload_to=get_jewellery_image_path, blank=True, null=True, validators=[validate_image_upload])
+    image = models.ImageField(
+        upload_to=get_jewellery_image_path, blank=True, null=True, validators=[validate_image_upload]
+    )
 
     # Barcode & UUID additions
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -132,6 +134,7 @@ class JewelleryItem(models.Model):
 
     def save(self, *args, **kwargs):
         from decimal import Decimal
+
         self.weight_in_grams = Decimal(str(self.weight_in_grams))
         self.making_charges = Decimal(str(self.making_charges))
         self.profit_margin = Decimal(str(self.profit_margin))

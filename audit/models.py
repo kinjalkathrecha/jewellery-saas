@@ -17,8 +17,8 @@ class AuditLog(models.Model):
     class Meta:
         ordering = ["-timestamp"]
         indexes = [
-            models.Index(fields=['shop', 'timestamp']),
-            models.Index(fields=['model_name', 'object_id']),
+            models.Index(fields=["shop", "timestamp"]),
+            models.Index(fields=["model_name", "object_id"]),
         ]
 
     def __str__(self):

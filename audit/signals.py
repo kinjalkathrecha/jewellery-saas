@@ -17,11 +17,11 @@ def get_changes(instance):
         old_instance = instance.__class__.objects.get(pk=instance.pk)
         for field in instance._meta.fields:
             field_name = field.name
-            
+
             # Avoid comparing binary or text representation of files/images since they don't serialize easily
             if isinstance(field, (models.FileField, models.ImageField)):
                 continue
-                
+
             old_val = getattr(old_instance, field_name)
             new_val = getattr(instance, field_name)
             if old_val != new_val:
@@ -45,7 +45,7 @@ def untrack_shop_deletion(sender, instance, **kwargs):
 
 
 def get_safe_shop(instance):
-    shop = getattr(instance, 'shop', None)
+    shop = getattr(instance, "shop", None)
     if shop and shop.pk:
         if shop.pk in _deleting_shops:
             return None
@@ -70,23 +70,23 @@ def audit_pre_save(sender, instance, **kwargs):
 def audit_post_save(sender, instance, created, **kwargs):
     user = get_current_user()
     ip_address = get_current_ip()
-    
+
     # Resolve shop safely
     shop = get_safe_shop(instance)
-    
+
     action = "CREATE" if created else "UPDATE"
-    changes = getattr(instance, '_audit_changes', {})
-    
+    changes = getattr(instance, "_audit_changes", {})
+
     if not created and not changes:
         return  # No changes made
-        
+
     if created:
         for f in instance._meta.fields:
             # Skip file fields from initial payload
             if isinstance(f, (models.FileField, models.ImageField)):
                 continue
             changes[f.name] = ["", str(getattr(instance, f.name))]
-            
+
     AuditLog.objects.create(
         shop=shop,
         user=user if user and user.is_authenticated else None,
@@ -94,7 +94,7 @@ def audit_post_save(sender, instance, created, **kwargs):
         model_name=sender.__name__,
         object_id=instance.pk,
         changes=changes,
-        ip_address=ip_address
+        ip_address=ip_address,
     )
 
 
@@ -105,16 +105,16 @@ def audit_post_save(sender, instance, created, **kwargs):
 def audit_post_delete(sender, instance, **kwargs):
     user = get_current_user()
     ip_address = get_current_ip()
-    
+
     # Resolve shop safely
     shop = get_safe_shop(instance)
-    
+
     changes = {}
     for f in instance._meta.fields:
         if isinstance(f, (models.FileField, models.ImageField)):
             continue
         changes[f.name] = [str(getattr(instance, f.name)), ""]
-        
+
     AuditLog.objects.create(
         shop=shop,
         user=user if user and user.is_authenticated else None,
@@ -122,5 +122,5 @@ def audit_post_delete(sender, instance, **kwargs):
         model_name=sender.__name__,
         object_id=instance.pk,
         changes=changes,
-        ip_address=ip_address
+        ip_address=ip_address,
     )

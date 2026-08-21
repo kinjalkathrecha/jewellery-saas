@@ -38,9 +38,13 @@ class TenantMiddleware(MiddlewareMixin):
                 if path.startswith(tenant_prefixes):
                     if request.user.is_superuser or request.user.is_staff:
                         from django.shortcuts import redirect
+
                         return redirect("admin:index")
                     from django.http import HttpResponseForbidden
-                    return HttpResponseForbidden("Access Denied: You are not associated with any shop. Please contact the administrator.")
+
+                    return HttpResponseForbidden(
+                        "Access Denied: You are not associated with any shop. Please contact the administrator."
+                    )
 
         # Store user and IP in thread locals for generic auditing
         _thread_locals.user = request.user if hasattr(request, "user") else None

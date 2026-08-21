@@ -145,7 +145,9 @@ class MetalRatesView(LoginRequiredMixin, TemplateView):
                         item.price = item.metal_cost + item.making_charges + item.profit_margin
                         bulk_items.append(item)
                     if bulk_items:
-                        JewelleryItem.objects.bulk_update(bulk_items, ["metal_rate_used", "metal_cost", "price"], batch_size=100)
+                        JewelleryItem.objects.bulk_update(
+                            bulk_items, ["metal_rate_used", "metal_cost", "price"], batch_size=100
+                        )
                     updated_count += 1
             if updated_count > 0:
                 messages.success(

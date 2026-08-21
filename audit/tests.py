@@ -53,6 +53,7 @@ class TestAuditAndSecurity:
 
         # Mock thread locals to simulate a logged-in request
         from core.middleware import _thread_locals
+
         _thread_locals.user = user
         _thread_locals.ip_address = "192.168.1.1"
 

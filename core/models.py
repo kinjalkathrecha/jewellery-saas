@@ -63,13 +63,16 @@ class Shop(models.Model):
         if is_new and not self.trial_ends_at:
             # 7 days trial by default
             self.trial_ends_at = timezone.now() + timedelta(days=7)
-        
+
         # Smart invalidation check
         should_invalidate_sub = True
         if not is_new:
             try:
                 original = self.__class__.objects.get(pk=self.pk)
-                if original.active_subscription_id == self.active_subscription_id and original.trial_ends_at == self.trial_ends_at:
+                if (
+                    original.active_subscription_id == self.active_subscription_id
+                    and original.trial_ends_at == self.trial_ends_at
+                ):
                     should_invalidate_sub = False
             except self.__class__.DoesNotExist:
                 pass
@@ -91,6 +94,7 @@ class Shop(models.Model):
 
     def _calculate_subscription_status(self):
         from django.conf import settings
+
         grace_days = getattr(settings, "SUBSCRIPTION_GRACE_DAYS", 3)
         now = timezone.now()
 
@@ -166,6 +170,7 @@ class Shop(models.Model):
 
     def get_subscription_status(self):
         from core.services import cache_service
+
         return cache_service.get_or_set_subscription_status(self.id, self._calculate_subscription_status)
 
     def __str__(self):

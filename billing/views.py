@@ -81,6 +81,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
 
         if form.is_valid() and items.is_valid():
             from django.db import transaction
+
             with transaction.atomic():
                 self.object = form.save()
 

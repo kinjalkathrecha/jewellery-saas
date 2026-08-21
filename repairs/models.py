@@ -46,7 +46,9 @@ class Repair(models.Model):
     item_category = models.CharField(max_length=50, choices=ITEM_CATEGORY_CHOICES)
     item_weight = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
     item_description = models.TextField(help_text="Describe the item markings, stones, scratches, etc.")
-    item_photo = models.ImageField(upload_to=get_repair_image_path, blank=True, null=True, validators=[validate_image_upload])
+    item_photo = models.ImageField(
+        upload_to=get_repair_image_path, blank=True, null=True, validators=[validate_image_upload]
+    )
 
     repair_type = models.CharField(max_length=100, help_text="e.g. Resizing, Polishing, Stone Setting")
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default="NORMAL")

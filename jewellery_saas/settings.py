@@ -217,8 +217,8 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Kolkata"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-CELERY_TASK_TIME_LIMIT = 5 * 60         # Hard timeout (5 minutes)
-CELERY_TASK_SOFT_TIME_LIMIT = 4 * 60    # Soft timeout (4 minutes)
+CELERY_TASK_TIME_LIMIT = 5 * 60  # Hard timeout (5 minutes)
+CELERY_TASK_SOFT_TIME_LIMIT = 4 * 60  # Soft timeout (4 minutes)
 CELERY_TASK_DEFAULT_RETRY_DELAY = 60
 CELERY_TASK_MAX_RETRIES = 3
 
