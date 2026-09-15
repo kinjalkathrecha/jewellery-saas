@@ -22,7 +22,8 @@ if not SECRET_KEY:
 DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = env.list(
-    "ALLOWED_HOSTS", default=["localhost", "127.0.0.1", "[::1]"] if (DEBUG or env.bool("CI", default=False)) else []
+    "ALLOWED_HOSTS",
+    default=["localhost", "127.0.0.1", "[::1]", "testserver"] if (DEBUG or env.bool("CI", default=False)) else [],
 )
 if not ALLOWED_HOSTS and not DEBUG:
     raise ValueError("ALLOWED_HOSTS must be configured in production")

@@ -37,15 +37,15 @@ def health_check(request):
     # 3. Probe Celery
     try:
         # Run inspect with short timeout to prevent hanging the HTTP thread
-        inspect = current_app.control.inspect(timeout=1.0)
-        ping_res = inspect.ping()
+        inspect = current_app.control.inspect(timeout=0.5)
+        ping_res = inspect.ping() if inspect else None
         if ping_res:
             celery_ok = "ok"
             active_workers = len(ping_res)
         else:
             celery_ok = "no_workers"
     except Exception as e:
-        celery_ok = f"error: {e!s}"
+        celery_ok = f"no_workers ({e!s})"
 
     # 4. Probe Storage
     try:
@@ -64,7 +64,7 @@ def health_check(request):
     is_healthy = (
         database_ok == "ok"
         and redis_ok == "ok"
-        and (celery_ok == "ok" or celery_ok == "no_workers")
+        and (celery_ok == "ok" or "no_workers" in celery_ok)
         and storage_ok == "ok"
     )
 

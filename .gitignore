@@ -32,6 +32,8 @@ Thumbs.db
 
 # Media (if not needed)
 media/
+staticfiles/
+scratch/
 
 # Backup files
 backup_before_pg.json

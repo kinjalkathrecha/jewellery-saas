@@ -113,7 +113,11 @@ def audit_post_delete(sender, instance, **kwargs):
     for f in instance._meta.fields:
         if isinstance(f, (models.FileField, models.ImageField)):
             continue
-        changes[f.name] = [str(getattr(instance, f.name)), ""]
+        try:
+            val = getattr(instance, f.name)
+        except Exception:
+            val = getattr(instance, f.attname, None)
+        changes[f.name] = [str(val), ""]
 
     AuditLog.objects.create(
         shop=shop,

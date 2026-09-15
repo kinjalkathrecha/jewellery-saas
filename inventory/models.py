@@ -135,11 +135,11 @@ class JewelleryItem(models.Model):
     def save(self, *args, **kwargs):
         from decimal import Decimal
 
-        self.weight_in_grams = Decimal(str(self.weight_in_grams))
-        self.making_charges = Decimal(str(self.making_charges))
-        self.profit_margin = Decimal(str(self.profit_margin))
-        self.metal_rate_used = Decimal(str(self.metal_rate_used))
-        self.price = Decimal(str(self.price))
+        self.weight_in_grams = Decimal(str(self.weight_in_grams or "0.000"))
+        self.making_charges = Decimal(str(self.making_charges or "0.00"))
+        self.profit_margin = Decimal(str(self.profit_margin or "0.00"))
+        self.metal_rate_used = Decimal(str(self.metal_rate_used or "0.00"))
+        self.price = Decimal(str(self.price or "0.00"))
 
         if self.metal_type and self.metal_type != "FIXED":
             rate = MetalRate.get_current_rate(self.shop, self.metal_type)

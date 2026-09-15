@@ -36,6 +36,9 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
     template_name = "billing/invoice_form.html"
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+
         from core.services.permissions import PlanPermissionService
 
         if not PlanPermissionService.check(request.shop, "create_invoice"):

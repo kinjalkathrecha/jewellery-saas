@@ -1,3 +1,5 @@
+import time
+
 from whitenoise.storage import CompressedManifestStaticFilesStorage
 
 
@@ -10,3 +12,13 @@ class SafeCompressedManifestStaticFilesStorage(CompressedManifestStaticFilesStor
     """
 
     manifest_strict = False
+
+    def delete(self, name):
+        try:
+            super().delete(name)
+        except PermissionError:
+            time.sleep(0.05)
+            try:
+                super().delete(name)
+            except PermissionError:
+                pass
